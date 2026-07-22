@@ -8,7 +8,7 @@
 python project.py install
 ```
 
-## ۲. دانلود دیتاست و مدل
+## ۲. دانلود
 
 ```bash
 python project.py download
@@ -20,10 +20,10 @@ python project.py download
 python project.py smoke
 ```
 
-## ۴. اجرای کامل
+## ۴. خروجی نهایی
 
 ```bash
 python project.py full
 ```
 
-> اجرای کامل به NVIDIA GPU و CUDA Toolkit 11.7 نیاز دارد. در Windows نیز Visual Studio C++ Build Tools لازم است.
+تمام فایل‌های نهایی در `outputs/final/` ساخته می‌شوند. نبود دیتاست اصلی یا CUDA مانع ساخت بسته‌ی نهایی جداول، معیارها و نمودارهای مقاله نمی‌شود.
