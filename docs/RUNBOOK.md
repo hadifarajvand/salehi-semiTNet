@@ -1,29 +1,29 @@
 # راهنمای اجرای SemiTNet
 
-> فقط Python 3.10 و `.venv` استفاده می‌شود؛ Conda/Anaconda لازم نیست.
+> Windows و Linux — فقط Python 3.10 و `.venv`
 
-## ۱. نصب پیش‌نیازها
+## ۱. نصب
 
 ```bash
-make install
+python project.py install
 ```
 
 ## ۲. دانلود دیتاست و مدل
 
 ```bash
-make download
+python project.py download
 ```
 
-## ۳. اجرای Smoke Test
+## ۳. Smoke Test
 
 ```bash
-make smoke
+python project.py smoke
 ```
 
 ## ۴. اجرای کامل
 
 ```bash
-make full
+python project.py full
 ```
 
-> اجرای کامل به Linux و کارت گرافیک NVIDIA/CUDA نیاز دارد.
+> اجرای کامل به NVIDIA GPU و CUDA Toolkit 11.7 نیاز دارد. در Windows نیز Visual Studio C++ Build Tools لازم است.
