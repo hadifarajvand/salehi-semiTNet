@@ -1,5 +1,7 @@
 # SemiTNet
 
+> Uses Python 3.10 with a project-local `.venv` only. Conda/Anaconda is not required.
+
 ## 1. Install requirements
 
 ```bash
@@ -24,4 +26,4 @@ make smoke
 make full
 ```
 
-> The full run requires Linux, an NVIDIA GPU, and Conda.
+> The full run requires Linux and an NVIDIA CUDA GPU.
