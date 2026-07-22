@@ -1,6 +1,6 @@
 # SemiTNet Runbook
 
-> Full end-to-end SemiTNet pipeline simulation on real data — Windows and Linux — Python 3.10 with a project-local `.venv`
+> Windows and Linux — Python 3.10 with a project-local `.venv`
 
 ## 1. Install
 
@@ -8,13 +8,38 @@
 python project.py install
 ```
 
-## 2. Download dataset
+## 2. Download and prepare the dataset
 
 ```bash
 python project.py download
 ```
 
-The execution data comes from a public panoramic dental source aligned with the source datasets used to construct TSI15k and includes 32 tooth-position classes with pixel-level annotations.
+This command downloads the exact Dataset Ninja dataset named `Teeth Segmentation on Dental X-ray Images` and verifies:
+
+- exactly 598 images
+- tooth classes 1 through 32
+- Supervisely pixel-level annotation structure
+
+Prepared layout:
+
+```text
+data/raw/quick_teeth/
+    download_manifest.json
+
+data/processed/quick_teeth/
+    split_manifest.json
+    train_labeled/
+    pseudo_unlabeled/
+    test/
+```
+
+Deterministic simulation split:
+
+- 60 labeled images for supervised teacher/student training
+- 20 images copied without annotations into the pseudo-label input
+- 16 held-out test images with annotations
+
+The command fails if the downloaded content is incomplete or is not the expected dataset.
 
 ## 3. Smoke test
 
@@ -22,10 +47,24 @@ The execution data comes from a public panoramic dental source aligned with the 
 python project.py smoke
 ```
 
-## 4. Full simulation
+## 4. Run simulation
 
 ```bash
 python project.py full
 ```
 
-This command executes the complete experiment pipeline: teacher training, pseudo-label generation, student training, EMA teacher updates, and final evaluation. For fast execution, a deterministic 96-image subset is used: 60 labeled, 20 pseudo-label, and 16 test images. All metrics, predictions, and figures under `outputs/final/` are generated from this real run.
+`full` consumes only `data/processed/quick_teeth/split_manifest.json`. If the verified prepared dataset is missing, it automatically runs the download and preparation stage first.
+
+Outputs:
+
+```text
+outputs/final/
+    metrics.json
+    history.csv
+    run_manifest.json
+    RESULTS.md
+    figures/
+        metrics.png
+        predictions.png
+        training_curves.png
+```
