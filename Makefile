@@ -1,25 +1,25 @@
 .PHONY: install download smoke full reference test package
 
-PY := .venv/bin/python
-
 install:
-	bash scripts/install.sh
+	python project.py install
 
 download:
-	$(PY) scripts/download_assets.py --all
+	python project.py download
 
 smoke:
-	$(PY) scripts/run_smoke.py
-	$(PY) scripts/acceptance_check.py --mode smoke
+	python project.py smoke
 
 full:
-	bash scripts/run_full_easy.sh
+	python project.py full
 
 reference:
-	$(PY) scripts/generate_reference_outputs.py
+	python project.py install
+	.venv/bin/python scripts/generate_reference_outputs.py
 
 test:
-	$(PY) -m unittest discover -s tests -v
+	python project.py install
+	.venv/bin/python -m unittest discover -s tests -v
 
 package:
-	$(PY) scripts/package_deliverable.py
+	python project.py install
+	.venv/bin/python scripts/package_deliverable.py
