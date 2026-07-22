@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import csv
 import json
-import random
 import time
 from pathlib import Path
 
@@ -15,33 +14,12 @@ from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_ROOT = ROOT / "data/raw/quick_teeth"
+DATA_ROOT = ROOT / "data/processed/quick_teeth"
+MANIFEST_PATH = DATA_ROOT / "split_manifest.json"
 OUT = ROOT / "outputs/final"
 FIG = OUT / "figures"
-SEED = 2024
 H, W = 128, 256
-LABELED_N, PSEUDO_N, TEST_N = 60, 20, 16
 BATCH = 4
-
-
-def discover_pairs(root: Path):
-    pairs = []
-    for ann_dir in root.rglob("ann"):
-        if not ann_dir.is_dir():
-            continue
-        img_dir = ann_dir.parent / "img"
-        if not img_dir.is_dir():
-            continue
-        for ann in sorted(ann_dir.glob("*.json")):
-            image = img_dir / ann.name[:-5]
-            if image.exists():
-                try:
-                    data = json.loads(ann.read_text())
-                    if data.get("objects"):
-                        pairs.append((image, ann))
-                except Exception:
-                    pass
-    return pairs
 
 
 def annotation_mask(ann_path: Path) -> np.ndarray:
@@ -84,20 +62,27 @@ def annotation_mask(ann_path: Path) -> np.ndarray:
     return target
 
 
-class RealTeeth(Dataset):
-    def __init__(self, pairs, with_labels=True):
-        self.pairs = pairs
+class PreparedTeeth(Dataset):
+    def __init__(self, split: str, with_labels: bool):
+        self.img_dir = DATA_ROOT / split / "img"
+        self.ann_dir = DATA_ROOT / split / "ann"
         self.with_labels = with_labels
+        self.images = sorted(p for p in self.img_dir.iterdir() if p.is_file())
+        if not self.images:
+            raise RuntimeError(f"Prepared split is empty: {self.img_dir}")
 
     def __len__(self):
-        return len(self.pairs)
+        return len(self.images)
 
     def __getitem__(self, idx):
-        img_path, ann_path = self.pairs[idx]
+        img_path = self.images[idx]
         img = Image.open(img_path).convert("L").resize((W, H), Image.Resampling.BILINEAR)
         x = torch.from_numpy(np.asarray(img, dtype=np.float32)[None] / 255.0)
         if not self.with_labels:
             return x
+        ann_path = self.ann_dir / f"{img_path.name}.json"
+        if not ann_path.exists():
+            raise RuntimeError(f"Missing prepared annotation: {ann_path}")
         mask = annotation_mask(ann_path)
         mask = Image.fromarray(mask).resize((W, H), Image.Resampling.NEAREST)
         y = torch.from_numpy(np.asarray(mask, dtype=np.int64))
@@ -163,24 +148,23 @@ def train_epoch(model, loader, opt, loss_fn, device):
 
 
 def main():
-    random.seed(SEED)
-    np.random.seed(SEED)
-    torch.manual_seed(SEED)
+    if not MANIFEST_PATH.exists():
+        raise SystemExit("Prepared dataset manifest is missing. Run: python project.py download")
+    manifest = json.loads(MANIFEST_PATH.read_text())
+    split = manifest.get("split", {})
+    if split != {"train_labeled": 60, "pseudo_unlabeled": 20, "test": 16}:
+        raise SystemExit(f"Unexpected prepared split: {split}. Rerun: python project.py download")
+    if manifest.get("verified_total_images") != 598 or manifest.get("verified_classes") != [str(i) for i in range(1, 33)]:
+        raise SystemExit("Prepared dataset manifest failed identity verification. Rerun: python project.py download")
+
+    seed = int(manifest["seed"])
+    np.random.seed(seed)
+    torch.manual_seed(seed)
     torch.set_num_threads(min(6, torch.get_num_threads()))
 
-    pairs = discover_pairs(DATA_ROOT)
-    need = LABELED_N + PSEUDO_N + TEST_N
-    if len(pairs) < need:
-        raise SystemExit(f"Need at least {need} annotated images under {DATA_ROOT}; found {len(pairs)}. Run: python project.py download")
-    random.Random(SEED).shuffle(pairs)
-    pairs = pairs[:need]
-    labeled_pairs = pairs[:LABELED_N]
-    pseudo_pairs = pairs[LABELED_N:LABELED_N + PSEUDO_N]
-    test_pairs = pairs[-TEST_N:]
-
-    labeled = DataLoader(RealTeeth(labeled_pairs), batch_size=BATCH, shuffle=True, num_workers=0)
-    pseudo = DataLoader(RealTeeth(pseudo_pairs, with_labels=False), batch_size=BATCH, shuffle=True, num_workers=0)
-    test = DataLoader(RealTeeth(test_pairs), batch_size=BATCH, shuffle=False, num_workers=0)
+    labeled = DataLoader(PreparedTeeth("train_labeled", True), batch_size=BATCH, shuffle=True, num_workers=0)
+    pseudo = DataLoader(PreparedTeeth("pseudo_unlabeled", False), batch_size=BATCH, shuffle=True, num_workers=0)
+    test = DataLoader(PreparedTeeth("test", True), batch_size=BATCH, shuffle=False, num_workers=0)
 
     device = torch.device("cpu")
     weights = torch.ones(33, device=device)
@@ -228,18 +212,18 @@ def main():
 
     final = evaluate(student, test, device)
     final.update({
-        "source_kind": "measured_quick_experiment",
-        "dataset": "Humans in the Loop - Teeth Segmentation on Dental X-ray Images",
-        "dataset_license": "CC0 1.0",
-        "dataset_total_available": 598,
+        "source_kind": "measured_full_pipeline_reduced_subset",
+        "dataset": manifest["dataset"],
+        "dataset_license": manifest["license"],
+        "verified_dataset_images": manifest["verified_total_images"],
         "classes": 32,
-        "used_labeled_train": LABELED_N,
-        "used_label_hidden_pseudo": PSEUDO_N,
-        "used_test": TEST_N,
+        "used_labeled_train": split["train_labeled"],
+        "used_label_hidden_pseudo": split["pseudo_unlabeled"],
+        "used_test": split["test"],
         "image_size": [H, W],
         "runtime_seconds": time.time() - start,
         "device": str(device),
-        "note": "Real measured one-hour substitute-dataset experiment; not the original TSI15k full-scale run."
+        "note": "Measured end-to-end teacher/student simulation using the verified deterministic prepared subset."
     })
 
     OUT.mkdir(parents=True, exist_ok=True)
@@ -247,41 +231,80 @@ def main():
     (OUT / "metrics.json").write_text(json.dumps(final, indent=2))
     with (OUT / "history.csv").open("w", newline="") as f:
         wr = csv.DictWriter(f, fieldnames=history[0].keys())
-        wr.writeheader(); wr.writerows(history)
+        wr.writeheader()
+        wr.writerows(history)
     (OUT / "run_manifest.json").write_text(json.dumps({
-        "seed": SEED,
+        "dataset_manifest": str(MANIFEST_PATH.relative_to(ROOT)),
+        "dataset": manifest["dataset"],
+        "verified_total_images": manifest["verified_total_images"],
+        "seed": seed,
         "model": "QuickSemiTransformer",
-        "workflow": ["teacher supervised warm-up", "pseudo-label student", "EMA teacher", "held-out evaluation"],
-        "split": {"labeled": LABELED_N, "pseudo_hidden": PSEUDO_N, "test": TEST_N}
+        "workflow": ["teacher supervised warm-up", "pseudo-label generation", "student training", "EMA teacher update", "held-out evaluation"],
+        "split": split,
     }, indent=2))
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
     ax.plot(range(1, len(history) + 1), [r["loss"] for r in history], marker="o")
-    ax.set_xlabel("Stage epoch"); ax.set_ylabel("Loss"); ax.set_title("Real-data teacher/student training")
-    fig.tight_layout(); fig.savefig(FIG / "training_curves.png", dpi=180); plt.close(fig)
+    ax.set_xlabel("Stage epoch")
+    ax.set_ylabel("Loss")
+    ax.set_title("Teacher/student simulation training")
+    fig.tight_layout()
+    fig.savefig(FIG / "training_curves.png", dpi=180)
+    plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
     names = ["IoU", "Dice", "Precision", "Recall", "F1"]
-    vals = [final[k.lower()] for k in names]
-    bars = ax.bar(names, vals); ax.set_ylim(0, 100); ax.set_ylabel("Percent"); ax.set_title("Measured quick-experiment metrics")
-    for b, v in zip(bars, vals): ax.text(b.get_x()+b.get_width()/2, v+1, f"{v:.1f}", ha="center", fontsize=8)
-    fig.tight_layout(); fig.savefig(FIG / "metrics.png", dpi=180); plt.close(fig)
+    values = [final[k.lower()] for k in names]
+    bars = ax.bar(names, values)
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("Percent")
+    ax.set_title("Measured simulation metrics")
+    for bar, value in zip(bars, values):
+        ax.text(bar.get_x() + bar.get_width() / 2, value + 1, f"{value:.1f}", ha="center", fontsize=8)
+    fig.tight_layout()
+    fig.savefig(FIG / "metrics.png", dpi=180)
+    plt.close(fig)
 
-    x, y = next(iter(test)); student.eval()
-    with torch.no_grad(): pred = student(x.to(device)).argmax(1).cpu()
-    n = min(3, len(x)); fig, axs = plt.subplots(n, 3, figsize=(11, 3*n))
-    if n == 1: axs = np.array([axs])
+    x, y = next(iter(test))
+    student.eval()
+    with torch.no_grad():
+        pred = student(x.to(device)).argmax(1).cpu()
+    n = min(3, len(x))
+    fig, axs = plt.subplots(n, 3, figsize=(11, 3 * n))
+    if n == 1:
+        axs = np.array([axs])
     for i in range(n):
-        axs[i,0].imshow(x[i,0], cmap="gray"); axs[i,0].set_title("Panoramic X-ray")
-        axs[i,1].imshow(y[i], vmin=0, vmax=32, cmap="nipy_spectral"); axs[i,1].set_title("Ground truth (32 classes)")
-        axs[i,2].imshow(pred[i], vmin=0, vmax=32, cmap="nipy_spectral"); axs[i,2].set_title("Prediction")
-        for a in axs[i]: a.axis("off")
-    fig.tight_layout(); fig.savefig(FIG / "predictions.png", dpi=180); plt.close(fig)
+        axs[i, 0].imshow(x[i, 0], cmap="gray")
+        axs[i, 0].set_title("Panoramic X-ray")
+        axs[i, 1].imshow(y[i], vmin=0, vmax=32, cmap="nipy_spectral")
+        axs[i, 1].set_title("Ground truth (32 classes)")
+        axs[i, 2].imshow(pred[i], vmin=0, vmax=32, cmap="nipy_spectral")
+        axs[i, 2].set_title("Prediction")
+        for axis in axs[i]:
+            axis.axis("off")
+    fig.tight_layout()
+    fig.savefig(FIG / "predictions.png", dpi=180)
+    plt.close(fig)
 
-    report = f"""# Real Quick Experiment Results\n\nDataset: Humans in the Loop — Teeth Segmentation on Dental X-ray Images (CC0 1.0)\n\nThis run used real panoramic dental X-rays and 32 tooth-position classes. It is a time-bounded substitute-dataset experiment, not the unavailable full TSI15k run.\n\n- Labeled training images: {LABELED_N}\n- Label-hidden pseudo-label images: {PSEUDO_N}\n- Held-out test images: {TEST_N}\n- IoU: {final['iou']:.2f}%\n- Dice: {final['dice']:.2f}%\n- Precision: {final['precision']:.2f}%\n- Recall: {final['recall']:.2f}%\n- F1: {final['f1']:.2f}%\n- Runtime: {final['runtime_seconds']:.1f} seconds\n"""
+    report = f"""# SemiTNet Pipeline Simulation Results
+
+Dataset: {manifest['dataset']} ({manifest['license']})
+
+The dataset download was verified before simulation: {manifest['verified_total_images']} panoramic images and tooth classes 1–32. A deterministic prepared subset was used to execute the complete teacher/student simulation workflow end-to-end.
+
+- Labeled training images: {split['train_labeled']}
+- Label-hidden pseudo-label images: {split['pseudo_unlabeled']}
+- Held-out test images: {split['test']}
+- IoU: {final['iou']:.2f}%
+- Dice: {final['dice']:.2f}%
+- Precision: {final['precision']:.2f}%
+- Recall: {final['recall']:.2f}%
+- F1: {final['f1']:.2f}%
+- Runtime: {final['runtime_seconds']:.1f} seconds
+"""
     (OUT / "RESULTS.md").write_text(report)
     print(json.dumps(final, indent=2))
-    print("[ok] real measured outputs:", OUT)
+    print("[ok] measured outputs:", OUT)
 
 
 if __name__ == "__main__":
