@@ -1,6 +1,6 @@
 {
   "repository": "hadifarajvand/salehi-semiTNet",
-  "platforms": ["Windows", "Linux"],
+  "platforms": ["Windows", "Linux", "macOS"],
   "python": "3.10",
   "environment": ".venv",
   "commands": {
@@ -9,23 +9,42 @@
     "smoke": "python project.py smoke",
     "full": "python project.py full"
   },
+  "dataset": {
+    "name": "Teeth Segmentation on Dental X-ray Images",
+    "source": "Dataset Ninja / Humans in the Loop",
+    "license": "CC0 1.0",
+    "expected_images": 598,
+    "expected_classes": "1..32",
+    "raw_root": "data/raw/quick_teeth",
+    "download_manifest": "data/raw/quick_teeth/download_manifest.json",
+    "processed_root": "data/processed/quick_teeth",
+    "split_manifest": "data/processed/quick_teeth/split_manifest.json",
+    "execution_split": {
+      "train_labeled": 60,
+      "pseudo_unlabeled": 20,
+      "test": 16
+    }
+  },
   "main_files": [
     "project.py",
     "README.md",
     "README.en.md",
     "docs/RUNBOOK.md",
     "docs/RUNBOOK.en.md",
-    "scripts/setup_full_env.py",
-    "scripts/run_full.py",
-    "scripts/run_official_inference.py",
-    "scripts/download_assets.py",
-    "scripts/run_smoke.py",
-    "scripts/prepare_dataset.py"
+    "scripts/download_quick_dataset.py",
+    "scripts/prepare_quick_dataset.py",
+    "scripts/run_quick_real_experiment.py",
+    "scripts/run_smoke.py"
+  ],
+  "outputs": [
+    "outputs/final/metrics.json",
+    "outputs/final/history.csv",
+    "outputs/final/run_manifest.json",
+    "outputs/final/RESULTS.md",
+    "outputs/final/figures/metrics.png",
+    "outputs/final/figures/predictions.png",
+    "outputs/final/figures/training_curves.png"
   ],
   "smoke_status": "PASS",
-  "full_run_requirements": {
-    "gpu": "NVIDIA CUDA GPU",
-    "cuda_toolkit": "11.7",
-    "windows_extra": "Visual Studio C++ Build Tools"
-  }
+  "dataset_guard": "Download fails unless exactly 598 images and classes 1..32 are verified before preparation."
 }
