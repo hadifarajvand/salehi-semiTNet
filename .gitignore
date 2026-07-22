@@ -7,8 +7,11 @@ vendor/SemiT-SAM/
 data/raw/
 data/processed/
 assets/checkpoints/
+reproduction/assets/checkpoints/
+reproduction/assets/dataset/
 outputs/full/
 outputs/inference/
+*.pth
 *.tar
 *.tar.gz
 *.zip
