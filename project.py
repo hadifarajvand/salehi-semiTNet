@@ -83,7 +83,7 @@ def relaunch_in_venv(command: str):
 def download():
     run([sys.executable, ROOT / "scripts/download_quick_dataset.py"])
     run([sys.executable, ROOT / "scripts/prepare_quick_dataset.py"])
-    print("[ok] dataset downloaded, verified, split, and ready for simulation")
+    print("[ok] reduced-simulation dataset downloaded, verified, split, and ready")
     print("[manifest]", PREPARED_MANIFEST)
 
 
@@ -94,22 +94,54 @@ def smoke():
 
 def full():
     if not PREPARED_MANIFEST.exists():
-        print("[info] Prepared dataset is missing; running download/setup first.")
+        print("[info] Prepared reduced-simulation dataset is missing; running download/setup first.")
         download()
     run([sys.executable, ROOT / "scripts/run_quick_real_experiment.py"])
     run([sys.executable, ROOT / "scripts/validate_final_outputs.py"])
     run([sys.executable, ROOT / "scripts/package_client_delivery.py"])
-    print("[ok] measured simulation outputs are ready under outputs/final")
+    print("[ok] reduced measured simulation outputs are ready under outputs/final")
+    print("[important] This command does NOT reproduce the paper-scale numerical experiment.")
     print("[ok] client package: SemiTNet-client-deliverable.zip")
+
+
+def audit():
+    run([sys.executable, ROOT / "scripts/reproducibility_gate.py"])
+
+
+def paper_asset(kind: str):
+    flag = "--checkpoint" if kind == "checkpoint" else "--dataset"
+    run([sys.executable, ROOT / "scripts/download_paper_assets.py", flag])
 
 
 def main():
     parser = argparse.ArgumentParser(description="SemiTNet project launcher")
-    parser.add_argument("command", choices=["install", "download", "smoke", "full"])
+    parser.add_argument(
+        "command",
+        choices=[
+            "install",
+            "download",
+            "smoke",
+            "full",
+            "audit",
+            "paper-assets-checkpoint",
+            "paper-assets-dataset",
+        ],
+    )
     args = parser.parse_args()
+
     if args.command == "install":
         install()
         return
+    if args.command == "audit":
+        audit()
+        return
+    if args.command == "paper-assets-checkpoint":
+        paper_asset("checkpoint")
+        return
+    if args.command == "paper-assets-dataset":
+        paper_asset("dataset")
+        return
+
     relaunch_in_venv(args.command)
     {"download": download, "smoke": smoke, "full": full}[args.command]()
 
