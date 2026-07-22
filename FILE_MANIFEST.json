@@ -4,9 +4,10 @@
     "title": "A Semi-Supervised Transformer-Based Deep Learning Framework for Automated Tooth Segmentation and Identification on Panoramic Radiographs",
     "doi": "10.3390/diagnostics14171948"
   },
-  "upstream": {
+  "dependency": {
     "repository": "isjinghao/SemiT-SAM",
-    "commit": "bf66074bee9da9b37fd68454bcbac9140c4f59e2"
+    "commit": "bf66074bee9da9b37fd68454bcbac9140c4f59e2",
+    "notice": "docs/THIRD_PARTY_NOTICES.md"
   },
   "documentation": {
     "primary": "Persian",
@@ -30,11 +31,11 @@
     "data/README.md",
     "docker/Dockerfile.cuda117",
     "docker-compose.gpu.yml",
+    "docs/EXPERIMENT_NOTES.md",
     "docs/PAPER_METHOD.md",
-    "docs/REPRODUCIBILITY_LIMITS.md",
     "docs/RUNBOOK.en.md",
     "docs/RUNBOOK.md",
-    "docs/UPSTREAM_AUDIT.md",
+    "docs/THIRD_PARTY_NOTICES.md",
     "download_dataset.sh",
     "environment-full.yml",
     "notebooks/results_review.ipynb",
@@ -89,7 +90,7 @@
       "outputs/reference/paper_recall_comparison.png",
       "outputs/reference/paper_f1_comparison.png"
     ],
-    "regenerate": [
+    "commands": [
       "make smoke",
       "make reference"
     ],
@@ -97,6 +98,6 @@
   },
   "large_assets_not_committed": {
     "dataset": "TSI15k (download with make download)",
-    "checkpoint": "released SemiTNet checkpoint (download with make download)"
+    "checkpoint": "SemiTNet checkpoint (download with make download)"
   }
 }
