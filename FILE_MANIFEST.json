@@ -1,0 +1,102 @@
+{
+  "repository": "hadifarajvand/salehi-semiTNet",
+  "paper": {
+    "title": "A Semi-Supervised Transformer-Based Deep Learning Framework for Automated Tooth Segmentation and Identification on Panoramic Radiographs",
+    "doi": "10.3390/diagnostics14171948"
+  },
+  "upstream": {
+    "repository": "isjinghao/SemiT-SAM",
+    "commit": "bf66074bee9da9b37fd68454bcbac9140c4f59e2"
+  },
+  "documentation": {
+    "primary": "Persian",
+    "readme": "README.md",
+    "runbook": "docs/RUNBOOK.md",
+    "secondary_english": [
+      "README.en.md",
+      "docs/RUNBOOK.en.md"
+    ]
+  },
+  "smoke_status": "PASS",
+  "tracked_text_and_config_files": [
+    ".github/workflows/smoke.yml",
+    ".gitignore",
+    "DELIVERABLE_STATUS.md",
+    "Makefile",
+    "README.en.md",
+    "README.md",
+    "configs/paper.yaml",
+    "configs/smoke.yaml",
+    "data/README.md",
+    "docker/Dockerfile.cuda117",
+    "docker-compose.gpu.yml",
+    "docs/PAPER_METHOD.md",
+    "docs/REPRODUCIBILITY_LIMITS.md",
+    "docs/RUNBOOK.en.md",
+    "docs/RUNBOOK.md",
+    "docs/UPSTREAM_AUDIT.md",
+    "download_dataset.sh",
+    "environment-full.yml",
+    "notebooks/results_review.ipynb",
+    "outputs/PREFLIGHT.json",
+    "outputs/reference/README.md",
+    "outputs/reference/paper_targets.json",
+    "outputs/smoke/README.md",
+    "outputs/smoke/SMOKE_REPORT.md",
+    "outputs/smoke/history.csv",
+    "outputs/smoke/metrics.json",
+    "outputs/smoke/run_manifest.json",
+    "paper/PAPER_SOURCE.md",
+    "paper/reference/paper_targets.json",
+    "paper/reference/table2_overall.csv",
+    "paper/reference/table3_groups.csv",
+    "requirements-smoke.txt",
+    "requirements-tools.txt",
+    "run_full.sh",
+    "run_inference.sh",
+    "run_smoke.sh",
+    "scripts/acceptance_check.py",
+    "scripts/bootstrap_upstream.py",
+    "scripts/compare_to_paper.py",
+    "scripts/compute_article_metrics.py",
+    "scripts/download_assets.py",
+    "scripts/generate_reference_outputs.py",
+    "scripts/generate_training_curves.py",
+    "scripts/inspect_dataset.py",
+    "scripts/package_deliverable.py",
+    "scripts/patch_upstream.py",
+    "scripts/preflight.py",
+    "scripts/prepare_dataset.py",
+    "scripts/run_full.py",
+    "scripts/run_official_inference.py",
+    "scripts/run_smoke.py",
+    "scripts/setup_full_env.sh",
+    "scripts/visualize_predictions.py",
+    "tests/test_reference.py",
+    "vendor/README.md"
+  ],
+  "generated_outputs": {
+    "smoke": [
+      "outputs/smoke/figures/architecture.png",
+      "outputs/smoke/figures/predictions.png",
+      "outputs/smoke/figures/teacher_student_workflow.png",
+      "outputs/smoke/figures/training_curves.png"
+    ],
+    "reference": [
+      "outputs/reference/paper_dice_comparison.png",
+      "outputs/reference/paper_iou_comparison.png",
+      "outputs/reference/paper_precision_comparison.png",
+      "outputs/reference/paper_recall_comparison.png",
+      "outputs/reference/paper_f1_comparison.png"
+    ],
+    "regenerate": [
+      "make smoke",
+      "make reference"
+    ],
+    "ci_artifact": "semitnet-generated-outputs"
+  },
+  "large_assets_not_committed": {
+    "dataset": "TSI15k (download with make download)",
+    "checkpoint": "released SemiTNet checkpoint (download with make download)"
+  }
+}
