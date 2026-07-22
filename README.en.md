@@ -8,13 +8,24 @@
 python project.py install
 ```
 
-## 2. Download dataset
+## 2. Download and prepare dataset
 
 ```bash
 python project.py download
 ```
 
-The execution dataset is a public panoramic dental segmentation source aligned with the data sources used to construct TSI15k and contains 32 tooth-position classes with pixel-level annotations.
+This command downloads the exact Dataset Ninja dataset named `Teeth Segmentation on Dental X-ray Images` from the Humans in the Loop source and verifies that it contains 598 images and tooth classes 1 through 32 before it is accepted.
+
+After download:
+
+- Raw data is kept under `data/raw/quick_teeth/`.
+- Download verification is stored in `data/raw/quick_teeth/download_manifest.json`.
+- The deterministic simulation split is created under `data/processed/quick_teeth/`.
+- Exact split provenance is stored in `data/processed/quick_teeth/split_manifest.json`.
+- Execution split: 60 labeled images, 20 label-hidden pseudo-label images, and 16 held-out test images.
+- Pseudo-label ground-truth annotations are not copied into the simulation input, preventing label leakage.
+
+If the downloaded content is incomplete or is not this exact dataset, `download` fails instead of allowing the simulation to continue.
 
 ## 3. Smoke test
 
@@ -28,4 +39,4 @@ python project.py smoke
 python project.py full
 ```
 
-`full` executes the complete experimental workflow end to end: teacher training, pseudo-label generation, student training, EMA teacher updates, and held-out evaluation. To keep execution time bounded, the simulation runs on a deterministic 96-image subset: 60 labeled images, 20 label-hidden pseudo-label images, and 16 held-out test images. All metrics and figures under `outputs/final/` are measured from this real execution.
+`full` consumes only the verified prepared manifest and executes teacher training, pseudo-label generation, student training, EMA teacher updates, and held-out evaluation. If the prepared dataset is missing, `full` automatically runs the download/setup stage first. All measured metrics and figures are written under `outputs/final/`.
