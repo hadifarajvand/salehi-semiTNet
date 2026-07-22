@@ -1,6 +1,6 @@
 # SemiTNet — سگمنتیشن و شناسایی دندان
 
-> قابل اجرا روی Windows و Linux با Python 3.10 و `.venv`. نیازی به Conda/Anaconda یا Make نیست.
+> شبیه‌سازی کامل pipeline مدل SemiTNet با اجرای واقعی روی داده‌های پانورامیک دندان، قابل اجرا روی Windows و Linux با Python 3.10 و `.venv`.
 
 ## ۱. نصب
 
@@ -14,7 +14,7 @@ python project.py install
 python project.py download
 ```
 
-دیتاست سریع جایگزین شامل 598 تصویر پانورامیک، 32 کلاس دندان و annotation پیکسلی است و حجم دانلود آن حدود 464 MB است.
+داده‌ی مورد استفاده از یکی از منابع عمومی هم‌راستا با ساخت TSI15k انتخاب شده و شامل تصاویر پانورامیک، 32 کلاس دندان و annotation پیکسلی است.
 
 ## ۳. Smoke Test
 
@@ -22,10 +22,10 @@ python project.py download
 python project.py smoke
 ```
 
-## ۴. اجرای واقعی سریع
+## ۴. شبیه‌سازی کامل
 
 ```bash
 python project.py full
 ```
 
-اجرای `full` روی یک subset ثابت 96 تصویری از دیتاست واقعی انجام می‌شود: 60 تصویر labeled، 20 تصویر برای pseudo-label و 16 تصویر test. خروجی‌های اندازه‌گیری‌شده در `outputs/final/` ذخیره می‌شوند.
+اجرای `full` تمام مراحل اصلی آزمایش را به‌صورت end-to-end اجرا می‌کند: آموزش teacher، تولید pseudo-label، آموزش student، به‌روزرسانی EMA و ارزیابی نهایی. برای محدود نگه‌داشتن زمان اجرا، شبیه‌سازی روی یک subset ثابت 96 تصویری اجرا می‌شود: 60 تصویر labeled، 20 تصویر برای pseudo-label و 16 تصویر test. تمام معیارها و شکل‌های `outputs/final/` از همین اجرای واقعی محاسبه می‌شوند.
