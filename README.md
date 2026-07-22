@@ -1,6 +1,6 @@
 # SemiTNet — سگمنتیشن و شناسایی دندان
 
-> شبیه‌سازی کامل pipeline مدل SemiTNet با اجرای واقعی روی داده‌های پانورامیک دندان، قابل اجرا روی Windows و Linux با Python 3.10 و `.venv`.
+> شبیه‌سازی end-to-end پایپ‌لاین SemiTNet روی داده‌های واقعی پانورامیک دندان، قابل اجرا با Python 3.10 و محیط محلی `.venv`.
 
 ## ۱. نصب
 
@@ -14,18 +14,15 @@ python project.py install
 python project.py download
 ```
 
-این دستور دقیقاً دیتاست `Teeth Segmentation on Dental X-ray Images` را از Dataset Ninja/ Humans in the Loop دریافت می‌کند و قبل از استفاده بررسی می‌کند که دیتاست شامل 598 تصویر و کلاس‌های دندان 1 تا 32 باشد.
+این دستور دیتاست `Teeth Segmentation on Dental X-ray Images` را دریافت می‌کند و فقط در صورتی ادامه می‌دهد که دقیقاً 598 تصویر و کلاس‌های دندان 1 تا 32 تأیید شوند.
 
 پس از دانلود:
-
-- نسخه خام در `data/raw/quick_teeth/` نگهداری می‌شود.
-- اطلاعات اعتبارسنجی در `data/raw/quick_teeth/download_manifest.json` ذخیره می‌شود.
-- split ثابت شبیه‌سازی به‌صورت خودکار در `data/processed/quick_teeth/` ساخته می‌شود.
-- مشخصات دقیق split در `data/processed/quick_teeth/split_manifest.json` ذخیره می‌شود.
-- split اجرا: 60 تصویر labeled، 20 تصویر label-hidden برای pseudo-label و 16 تصویر test.
-- annotation تصاویر pseudo-label وارد ورودی آموزش نمی‌شود تا leakage رخ ندهد.
-
-اگر فایل‌های موجود ناقص یا مربوط به دیتاست دیگری باشند، دستور download متوقف می‌شود و اجازه اجرای simulation را نمی‌دهد.
+- داده خام: `data/raw/quick_teeth/`
+- manifest دانلود: `data/raw/quick_teeth/download_manifest.json`
+- داده آماده: `data/processed/quick_teeth/`
+- manifest تقسیم‌بندی: `data/processed/quick_teeth/split_manifest.json`
+- split ثابت: 60 labeled + 20 pseudo-label بدون annotation + 16 held-out test
+- annotation تصاویر pseudo-label وارد training input نمی‌شود تا leakage رخ ندهد.
 
 ## ۳. Smoke Test
 
@@ -33,10 +30,18 @@ python project.py download
 python project.py smoke
 ```
 
-## ۴. شبیه‌سازی کامل
+## ۴. اجرای کامل شبیه‌سازی
 
 ```bash
 python project.py full
 ```
 
-اجرای `full` فقط از دیتاست آماده‌شده و manifest تأییدشده استفاده می‌کند و مراحل teacher training، pseudo-label generation، student training، EMA update و held-out evaluation را اجرا می‌کند. اگر دیتاست آماده نشده باشد، `full` ابتدا فرآیند download/setup را خودکار اجرا می‌کند. تمام معیارها و شکل‌های نهایی در `outputs/final/` ذخیره می‌شوند.
+اجرای `full` مراحل teacher training، pseudo-label generation، student training، EMA update، محافظت در برابر collapse، ارزیابی test، اعتبارسنجی سخت‌گیرانه خروجی و ساخت بسته تحویل را اجرا می‌کند.
+
+پیکسل‌های pseudo-label با confidence پایین به‌جای تبدیل‌شدن به background نادیده گرفته می‌شوند. health check مانع جایگزینی teacher سالم با student collapse‌شده می‌شود. اگر تمام معیارهای نهایی صفر باشند، اجرا PASS اعلام نمی‌شود و بسته نهایی ساخته نمی‌شود.
+
+خروجی معتبر در `outputs/final/` و ZIP تحویل در مسیر زیر ساخته می‌شود:
+
+```text
+SemiTNet-client-deliverable.zip
+```
