@@ -1,6 +1,6 @@
 # SemiTNet Runbook
 
-> Windows and Linux — Python 3.10 with a project-local `.venv`
+> Full end-to-end SemiTNet pipeline simulation on real data — Windows and Linux — Python 3.10 with a project-local `.venv`
 
 ## 1. Install
 
@@ -8,13 +8,13 @@
 python project.py install
 ```
 
-## 2. Download the real fast dataset
+## 2. Download dataset
 
 ```bash
 python project.py download
 ```
 
-Dataset: 598 panoramic X-rays, 32 tooth classes, pixel-level annotations, about 464 MB.
+The execution data comes from a public panoramic dental source aligned with the source datasets used to construct TSI15k and includes 32 tooth-position classes with pixel-level annotations.
 
 ## 3. Smoke test
 
@@ -22,10 +22,10 @@ Dataset: 598 panoramic X-rays, 32 tooth classes, pixel-level annotations, about 
 python project.py smoke
 ```
 
-## 4. Run the real quick experiment
+## 4. Full simulation
 
 ```bash
 python project.py full
 ```
 
-`full` uses 96 real images: 60 labeled, 20 label-hidden pseudo-label images, and 16 held-out test images. All metrics and figures under `outputs/final/` are measured from this run.
+This command executes the complete experiment pipeline: teacher training, pseudo-label generation, student training, EMA teacher updates, and final evaluation. For fast execution, a deterministic 96-image subset is used: 60 labeled, 20 pseudo-label, and 16 test images. All metrics, predictions, and figures under `outputs/final/` are generated from this real run.
