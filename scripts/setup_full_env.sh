@@ -17,7 +17,7 @@ UP="$ROOT/vendor/SemiT-SAM"
 if [[ -d "$UP/detectron2-main" ]]; then
   "$PIP" install -e "$UP/detectron2-main"
 else
-  "$PIP" install 'git+https://github.com/facebookresearch/detectron2.git'
+  "$PIP" install 'git+https://github.com/facebookresearch/detectron2.git@v0.6'
 fi
 
 if [[ -f "$UP/requirements.txt" ]]; then
