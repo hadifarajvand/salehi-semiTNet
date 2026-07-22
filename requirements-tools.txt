@@ -15,5 +15,5 @@ shapely>=2.0
 tensorboard>=2.14
 cityscapesscripts
 pytorch_pretrained_vit
-dataset-tools>=0.10
+dataset-tools>=0.2.2,<0.3
 supervisely>=6.73
