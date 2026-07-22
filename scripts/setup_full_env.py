@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import os
 import platform
 import shutil
@@ -22,11 +23,19 @@ def pip(*args):
     run([sys.executable, "-m", "pip", *args])
 
 
-def ensure_cuda_torch():
-    import torch
+def torch_info():
+    code = (
+        "import json,torch; from torch.utils.cpp_extension import CUDA_HOME; "
+        "print(json.dumps({'version':torch.__version__,'cuda':torch.version.cuda,"
+        "'available':torch.cuda.is_available(),'devices':torch.cuda.device_count(),'cuda_home':CUDA_HOME}))"
+    )
+    return json.loads(subprocess.check_output([sys.executable, "-c", code], text=True))
 
-    if torch.cuda.is_available() and torch.version.cuda:
-        return
+
+def ensure_cuda_torch():
+    info = torch_info()
+    if info["available"] and info["cuda"]:
+        return info
 
     if shutil.which("nvidia-smi") is None:
         raise SystemExit("NVIDIA GPU/driver not detected. Full run requires CUDA.")
@@ -36,6 +45,10 @@ def ensure_cuda_torch():
         "--extra-index-url", "https://download.pytorch.org/whl/cu117",
         "torch==1.13.1+cu117", "torchvision==0.14.1+cu117",
     )
+    info = torch_info()
+    if not info["available"]:
+        raise SystemExit("CUDA PyTorch was installed but no CUDA GPU is available to the .venv.")
+    return info
 
 
 def main():
@@ -45,7 +58,16 @@ def main():
         raise SystemExit("Model source is missing. Run: python project.py install")
 
     pip("install", "--upgrade", "pip", "setuptools", "wheel")
-    ensure_cuda_torch()
+    info = ensure_cuda_torch()
+
+    if not info.get("cuda_home"):
+        hint = (
+            "Install CUDA Toolkit 11.7 and Visual Studio C++ Build Tools, then reopen the terminal."
+            if platform.system() == "Windows"
+            else "Install CUDA Toolkit 11.7 with nvcc and a compatible C/C++ compiler."
+        )
+        raise SystemExit("CUDA toolkit compiler was not detected. " + hint)
+
     pip("install", "-r", str(ROOT / "requirements-tools.txt"))
 
     detectron2_local = UPSTREAM / "detectron2-main"
@@ -67,24 +89,15 @@ def main():
     env["FORCE_CUDA"] = "1"
     run([sys.executable, "setup.py", "build", "install"], cwd=OPS, env=env)
 
-    import torch
-    from torch.utils.cpp_extension import CUDA_HOME
-
-    if CUDA_HOME is None:
-        hint = (
-            "Install CUDA Toolkit 11.7 and Visual Studio C++ Build Tools, then reopen the terminal."
-            if platform.system() == "Windows"
-            else "Install CUDA Toolkit 11.7 with nvcc and a compatible C/C++ compiler."
-        )
-        raise SystemExit("CUDA toolkit compiler was not detected. " + hint)
-
-    import detectron2  # noqa: F401
+    subprocess.run([sys.executable, "-c", "import detectron2, MultiScaleDeformableAttention"], check=True)
+    info = torch_info()
     print("[ok] full environment ready")
     print("Python:", sys.executable)
-    print("PyTorch:", torch.__version__)
-    print("CUDA runtime:", torch.version.cuda)
-    print("CUDA available:", torch.cuda.is_available())
-    print("CUDA_HOME:", CUDA_HOME)
+    print("PyTorch:", info["version"])
+    print("CUDA runtime:", info["cuda"])
+    print("CUDA available:", info["available"])
+    print("CUDA devices:", info["devices"])
+    print("CUDA_HOME:", info["cuda_home"])
 
 
 if __name__ == "__main__":
