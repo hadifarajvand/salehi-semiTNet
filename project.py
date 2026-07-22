@@ -62,8 +62,9 @@ def install():
     else:
         run([VENV_PY, "-m", "pip", "install", "torch==1.13.1", "torchvision==0.14.1"])
 
+    # The reduced-scale simulation uses only the lightweight runtime dependencies.
+    # requirements-tools.txt is retained for optional legacy/full-research utilities.
     run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-smoke.txt"])
-    run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-tools.txt"])
     print(f"[ok] .venv ready: {VENV_PY}")
 
 
@@ -78,18 +79,8 @@ def relaunch_in_venv(command: str):
         result = subprocess.run([str(VENV_PY), str(Path(__file__).resolve()), command])
         raise SystemExit(result.returncode)
 
-def ensure_download_tools():
-    try:
-        import dataset_tools  # noqa: F401
-    except ImportError:
-        print("[info] download tools missing; installing requirements-tools.txt")
-        run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-tools.txt"])
-
 
 def download():
-    # Exact named public dataset used for the reduced simulation execution.
-    # The downloader verifies 598 images and tooth classes 1..32 before setup.
-    ensure_download_tools()
     run([sys.executable, ROOT / "scripts/download_quick_dataset.py"])
     run([sys.executable, ROOT / "scripts/prepare_quick_dataset.py"])
     print("[ok] dataset downloaded, verified, split, and ready for simulation")
@@ -106,7 +97,10 @@ def full():
         print("[info] Prepared dataset is missing; running download/setup first.")
         download()
     run([sys.executable, ROOT / "scripts/run_quick_real_experiment.py"])
+    run([sys.executable, ROOT / "scripts/validate_final_outputs.py"])
+    run([sys.executable, ROOT / "scripts/package_client_delivery.py"])
     print("[ok] measured simulation outputs are ready under outputs/final")
+    print("[ok] client package: SemiTNet-client-deliverable.zip")
 
 
 def main():
