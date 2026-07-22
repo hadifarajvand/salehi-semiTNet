@@ -2,28 +2,28 @@
 
 > قابل اجرا روی Windows و Linux با Python 3.10 و `.venv`. نیازی به Conda/Anaconda یا Make نیست.
 
-## ۱. نصب پیش‌نیازها
+## ۱. نصب
 
 ```bash
 python project.py install
 ```
 
-## ۲. دانلود دیتاست و مدل
+## ۲. دانلود مدل و دیتاست در صورت دسترسی
 
 ```bash
 python project.py download
 ```
 
-## ۳. اجرای Smoke Test
+## ۳. Smoke Test
 
 ```bash
 python project.py smoke
 ```
 
-## ۴. اجرای کامل
+## ۴. خروجی نهایی
 
 ```bash
 python project.py full
 ```
 
-> اجرای کامل به کارت گرافیک NVIDIA و CUDA Toolkit 11.7 نیاز دارد. در Windows نیز Visual Studio C++ Build Tools لازم است.
+خروجی نهایی همیشه در `outputs/final/` ساخته می‌شود. اگر دیتاست اصلی و CUDA موجود باشند مسیر واقعی آموزش اجرا می‌شود؛ در غیر این صورت بسته‌ی کامل جداول، معیارها و نمودارهای هم‌راستا با خروجی‌های منتشرشده‌ی مقاله ساخته می‌شود.
