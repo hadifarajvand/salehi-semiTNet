@@ -10,8 +10,8 @@ This audit separates artifact integrity from paper equivalence. The existing PAS
 |---|---|---|
 | G0 — reduced baseline integrity | **PASS** | Existing canonical measured outputs and manifests are internally consistent. |
 | G1 — official checkpoint equivalence | **BLOCKED** | No evaluation of the exact released checkpoint on the exact 191-image paper test set is present. |
-| G2 — methodological faithfulness | **FAIL for current reduced run** | Dataset, split, resolution, architecture, training schedule and evaluator materially differ from the publication protocol. |
-| G3 — full training reproduction | **BLOCKED** | Must not proceed as a reproduction claim until G1 is established and a paper-faithful run exists. |
+| G2 — methodological faithfulness | **BLOCKED** | No frozen publication-faithful method manifest exists yet; the current reduced run explicitly fails paper equivalence. |
+| G3 — full training reproduction | **BLOCKED** | No paper-faithful full training output exists, and G1/G2 are prerequisites. |
 
 ## Current defensible statement
 
@@ -38,7 +38,7 @@ This audit separates artifact integrity from paper equivalence. The existing PAS
 | Recall | 97.10 | 12.03 | -85.07 |
 | F1 | 95.90 | 12.27 | -83.63 |
 
-These differences are too large to explain as ordinary seed variance. The current run is a materially different experiment and should not be tuned as though it were the publication implementation.
+These differences are too large to treat as ordinary run variance. The current run is a materially different experiment and should not be tuned as though it were the publication implementation.
 
 ## Why the current run is not paper-equivalent
 
@@ -46,7 +46,7 @@ These differences are too large to explain as ordinary seed variance. The curren
 2. The reduced runner converts images to grayscale and resizes them to 128×256. The publication-compatible pipeline operates at 1024 input size with RGB preprocessing.
 3. `QuickSemiTransformer` is a lightweight surrogate. It is not the publication MobileSAM/TinyViT + multi-scale/query/mask-decoder system.
 4. The reduced training budget is 8 teacher epochs and 2 student passes. The paper reports a 26,250-iteration schedule.
-5. The reduced pseudo-label settings (`0.35`, unsupervised weight `0.05`) are not the paper's semi-supervised protocol.
+5. The reduced pseudo-label settings (`0.35`, unsupervised weight `0.05`) are not the publication protocol.
 6. The reduced-run evaluator has not been proven identical to the publication evaluator.
 
 ## Exact author checkpoint provenance pinned for G1
@@ -71,7 +71,7 @@ Acceptance tolerances:
 - Recall: ±2.0 points
 - F1: ±2.0 points
 
-If this passes, the repository may claim that the published checkpoint evaluation has been reproduced within declared tolerance. Only then should full paper-faithful retraining begin.
+If this passes, the repository may claim that the published checkpoint evaluation has been reproduced within declared tolerance. Only then should G2 be frozen and full paper-faithful retraining begin.
 
 ## Stop rules
 
