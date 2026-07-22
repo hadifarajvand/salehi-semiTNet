@@ -1,29 +1,29 @@
 # SemiTNet Runbook
 
-> Uses Python 3.10 with a project-local `.venv` only. Conda/Anaconda is not required.
+> Windows and Linux — Python 3.10 with a project-local `.venv`
 
-## 1. Install requirements
+## 1. Install
 
 ```bash
-make install
+python project.py install
 ```
 
 ## 2. Download dataset and model
 
 ```bash
-make download
+python project.py download
 ```
 
-## 3. Run smoke test
+## 3. Smoke test
 
 ```bash
-make smoke
+python project.py smoke
 ```
 
-## 4. Run full simulation
+## 4. Full run
 
 ```bash
-make full
+python project.py full
 ```
 
-> The full run requires Linux and an NVIDIA CUDA GPU.
+> The full run requires an NVIDIA GPU and CUDA Toolkit 11.7. Windows also requires Visual Studio C++ Build Tools.
