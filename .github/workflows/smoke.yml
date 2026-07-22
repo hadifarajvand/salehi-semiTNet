@@ -1,20 +1,55 @@
-name: smoke
+name: smoke-and-reference
+
 on:
   push:
   pull_request:
   workflow_dispatch:
+
 jobs:
-  smoke:
+  reproduce-lightweight:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r requirements-smoke.txt
-      - run: make test
-      - run: make smoke
-      - uses: actions/upload-artifact@v4
+
+      - name: Install lightweight dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-smoke.txt
+          pip install -r requirements-tools.txt
+
+      - name: Run unit tests
+        run: make test
+
+      - name: Run CPU smoke simulation
+        run: make smoke
+
+      - name: Regenerate paper-reference figures
+        run: make reference
+
+      - name: Verify expected generated files
+        run: |
+          test -f outputs/smoke/metrics.json
+          test -f outputs/smoke/history.csv
+          test -f outputs/smoke/figures/architecture.png
+          test -f outputs/smoke/figures/predictions.png
+          test -f outputs/smoke/figures/teacher_student_workflow.png
+          test -f outputs/smoke/figures/training_curves.png
+          test -f outputs/reference/paper_dice_comparison.png
+          test -f outputs/reference/paper_iou_comparison.png
+          test -f outputs/reference/paper_precision_comparison.png
+          test -f outputs/reference/paper_recall_comparison.png
+          test -f outputs/reference/paper_f1_comparison.png
+
+      - name: Upload generated outputs
+        uses: actions/upload-artifact@v4
         with:
-          name: semitnet-smoke-outputs
-          path: outputs/smoke
+          name: semitnet-generated-outputs
+          path: |
+            outputs/smoke
+            outputs/reference
+          if-no-files-found: error
+          retention-days: 30
