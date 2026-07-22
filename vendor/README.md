@@ -1,1 +1,1 @@
-The pinned upstream source is downloaded here by `python scripts/bootstrap_upstream.py`.
+The full-model dependency is downloaded into this directory during `make bootstrap`. Third-party license and attribution details are documented in `docs/THIRD_PARTY_NOTICES.md`.
