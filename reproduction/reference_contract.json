@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "project": "SemiTNet reproducibility contract",
+  "publication": {
+    "title": "A Semi-Supervised Transformer-Based Deep Learning Framework for Automated Tooth Segmentation and Identification on Panoramic Radiographs",
+    "doi": "10.3390/diagnostics14171948",
+    "published_metrics_percent": {
+      "iou": 94.41,
+      "dice": 95.45,
+      "precision": 94.74,
+      "recall": 97.10,
+      "f1": 95.90
+    },
+    "dataset": {
+      "name": "TSI15k",
+      "total": 16317,
+      "labeled_total": 1589,
+      "labeled_train": 1398,
+      "unlabeled_train": 14728,
+      "test": 191,
+      "fully_dentate_test": 40,
+      "partially_edentulous_test": 151,
+      "paper_data_url": "https://huggingface.co/datasets/Bryceee/TISI15k-Dataset/blob/main/TISI15k-Dataset.tar"
+    },
+    "training": {
+      "input_size": 1024,
+      "optimizer": "AdamW",
+      "base_learning_rate": 0.0001,
+      "lr_steps": [24000, 25000],
+      "iterations": 26250,
+      "total_batch_size_paper": 16,
+      "object_queries": 100,
+      "reported_hardware": "8x NVIDIA V100 32GB",
+      "reported_hours": 6
+    }
+  },
+  "author_checkpoint": {
+    "repository": "Bryceee/SemiTNet",
+    "revision": "2d79fa571467b159fbcf279d8676bd07fd0dcc9a",
+    "filename": "SemiTNet_Tooth_Instance_Segmentation_32Classes.pth",
+    "size_bytes": 338584301,
+    "sha256": "8364853c7632a491fd66108e23a536fa68e9a9c9b416b21c69143a4d02a26c0a",
+    "purpose": "Evaluator/data-pipeline equivalence gate before any retraining claim"
+  },
+  "author_code": {
+    "paper_url": "https://github.com/isbrycee/SemiTNet",
+    "current_resolved_repository": "https://github.com/isjinghao/SemiT-SAM",
+    "warning": "The upstream repository evolved after publication. Current-main settings must not be assumed identical to publication settings without a recorded discrepancy audit."
+  },
+  "current_reduced_baseline": {
+    "commit": "aad3a6a86f8e5edb846ceb92dc38999cd88596ce",
+    "source_kind": "measured_full_pipeline_reduced_subset",
+    "dataset": "Teeth Segmentation on Dental X-ray Images",
+    "verified_dataset_images": 598,
+    "used_split": {
+      "labeled_train": 60,
+      "pseudo_unlabeled": 20,
+      "test": 16
+    },
+    "input_hw": [128, 256],
+    "teacher_epochs": 8,
+    "student_passes": 2,
+    "pseudo_threshold": 0.35,
+    "unsupervised_weight": 0.05,
+    "metrics_percent": {
+      "iou": 33.05651614205745,
+      "dice": 49.68793276800474,
+      "precision": 12.52662423999735,
+      "recall": 12.02895676318772,
+      "f1": 12.272746893320026
+    }
+  },
+  "gates": {
+    "G0_reduced_baseline_integrity": {
+      "requirement": "Existing measured outputs, manifests, figures and package are internally consistent.",
+      "claim_enabled": "Reduced-scale measured re-simulation only"
+    },
+    "G1_official_checkpoint_equivalence": {
+      "requirement": "Run the official author checkpoint on the exact 191-image paper test set using a publication-compatible evaluator.",
+      "absolute_tolerance_percentage_points": {
+        "iou": 1.0,
+        "dice": 1.0,
+        "precision": 2.0,
+        "recall": 2.0,
+        "f1": 2.0
+      },
+      "claim_enabled": "Evaluation/data pipeline reproduces published checkpoint performance"
+    },
+    "G2_method_faithfulness": {
+      "requirement": "Architecture, class mapping, preprocessing, augmentation, labeled/unlabeled/test identities, teacher-student schedule, pseudo-label rules, optimizer, LR schedule and evaluator are frozen and documented against the publication-era method.",
+      "claim_enabled": "Methodologically faithful reproduction setup"
+    },
+    "G3_training_reproduction": {
+      "requirement": "At least one full paper-faithful training run completes from declared initialization and passes the same evaluator. For stability claims, run at least three declared seeds.",
+      "claim_enabled": "Numerical reproduction from training"
+    }
+  },
+  "claim_policy": {
+    "forbidden_until_G1": [
+      "reproduces the paper results",
+      "paper-equivalent metrics",
+      "same exact results as the paper"
+    ],
+    "required_language_for_current_baseline": "Measured reduced-scale re-simulation; not numerically equivalent to the published full-scale experiment."
+  }
+}
