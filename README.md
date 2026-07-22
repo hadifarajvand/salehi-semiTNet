@@ -1,5 +1,7 @@
 # SemiTNet — سگمنتیشن و شناسایی دندان
 
+> فقط Python 3.10 و `.venv` استفاده می‌شود؛ Conda/Anaconda لازم نیست.
+
 ## ۱. نصب پیش‌نیازها
 
 ```bash
@@ -24,4 +26,4 @@ make smoke
 make full
 ```
 
-> اجرای کامل به Linux، کارت گرافیک NVIDIA و Conda نیاز دارد.
+> اجرای کامل به Linux و کارت گرافیک NVIDIA/CUDA نیاز دارد.
