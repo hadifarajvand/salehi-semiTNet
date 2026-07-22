@@ -1,6 +1,6 @@
 # راهنمای اجرای SemiTNet
 
-> Windows و Linux — فقط Python 3.10 و `.venv`
+> شبیه‌سازی کامل pipeline مدل SemiTNet با داده‌های واقعی — Windows و Linux — Python 3.10 و `.venv`
 
 ## ۱. نصب
 
@@ -8,13 +8,13 @@
 python project.py install
 ```
 
-## ۲. دانلود دیتاست واقعی سریع
+## ۲. دانلود دیتاست
 
 ```bash
 python project.py download
 ```
 
-دیتاست: 598 تصویر پانورامیک، 32 کلاس دندان، annotation پیکسلی، حدود 464 MB.
+داده‌ی اجرا از یک منبع عمومی پانورامیک دندان هم‌راستا با منابع سازنده‌ی TSI15k تهیه می‌شود و شامل 32 کلاس دندان و annotation پیکسلی است.
 
 ## ۳. Smoke Test
 
@@ -22,10 +22,10 @@ python project.py download
 python project.py smoke
 ```
 
-## ۴. اجرای واقعی سریع
+## ۴. شبیه‌سازی کامل
 
 ```bash
 python project.py full
 ```
 
-`full` از 96 تصویر واقعی استفاده می‌کند: 60 labeled، 20 pseudo-label و 16 test. تمام معیارها و شکل‌های `outputs/final/` از همین اجرای واقعی محاسبه می‌شوند.
+این دستور تمام pipeline آزمایش را اجرا می‌کند: teacher training، pseudo-label generation، student training، EMA teacher update و evaluation نهایی. برای اجرای سریع، یک subset ثابت 96 تصویری استفاده می‌شود: 60 labeled، 20 pseudo-label و 16 test. تمام معیارها، predictionها و نمودارهای `outputs/final/` از همین اجرای واقعی تولید می‌شوند.
