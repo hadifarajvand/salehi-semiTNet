@@ -1,0 +1,62 @@
+{
+  "overall_classification": "REDUCED_BASELINE_VALID_NOT_PAPER_EQUIVALENT",
+  "G0_reduced_baseline": {
+    "status": "PASS",
+    "checks": {
+      "metrics_present_and_finite": true,
+      "source_kind_matches": true,
+      "dataset_count_matches": true,
+      "split_matches": true,
+      "canonical_metrics_match": true
+    },
+    "allowed_claim": "Reduced-scale measured re-simulation only"
+  },
+  "G1_official_checkpoint": {
+    "status": "BLOCKED",
+    "reason": "No official-checkpoint evaluation on the exact 191-image paper test set is present.",
+    "known_checkpoint_provenance": {
+      "revision": "2d79fa571467b159fbcf279d8676bd07fd0dcc9a",
+      "filename": "SemiTNet_Tooth_Instance_Segmentation_32Classes.pth",
+      "size_bytes": 338584301,
+      "sha256": "8364853c7632a491fd66108e23a536fa68e9a9c9b416b21c69143a4d02a26c0a"
+    }
+  },
+  "G2_method_faithfulness": {
+    "status": "FAIL_FOR_CURRENT_REDUCED_RUN",
+    "reasons": [
+      "Current dataset is not TSI15k.",
+      "Current split is 60/20/16 instead of the paper 1398/14728/191 protocol.",
+      "Current input is 128x256 grayscale instead of publication-compatible 1024 RGB processing.",
+      "Current QuickSemiTransformer is a lightweight surrogate rather than the publication architecture.",
+      "Current teacher/student schedule and pseudo-label weighting differ materially from the publication protocol.",
+      "Current evaluator is not established as the publication evaluator."
+    ]
+  },
+  "G3_training_reproduction": {
+    "status": "BLOCKED",
+    "reason": "G1 has not passed and no full paper-faithful training run is present."
+  },
+  "paper_metrics": {
+    "iou": 94.41,
+    "dice": 95.45,
+    "precision": 94.74,
+    "recall": 97.1,
+    "f1": 95.9
+  },
+  "reduced_metrics": {
+    "iou": 33.05651614205745,
+    "dice": 49.68793276800474,
+    "precision": 12.52662423999735,
+    "recall": 12.02895676318772,
+    "f1": 12.272746893320026
+  },
+  "gap_percentage_points": {
+    "iou": -61.35348385794255,
+    "dice": -45.76206723199526,
+    "precision": -82.21337576000265,
+    "recall": -85.07104323681227,
+    "f1": -83.62725310667997
+  },
+  "defensible_statement": "Measured reduced-scale re-simulation; not numerically equivalent to the published full-scale experiment.",
+  "highest_priority_next_test": "Run the exact released author checkpoint on the exact 191-image paper test set with a publication-compatible evaluator. Do not begin expensive retraining until this passes."
+}
