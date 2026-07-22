@@ -1,0 +1,15 @@
+upstream_commit: bf66074bee9da9b37fd68454bcbac9140c4f59e2
+num_classes: 32
+input_size: 1024
+num_queries: 100
+decoder_layers: 9
+optimizer: ADAMW
+base_lr: 0.0001
+max_iter: 26250
+lr_steps: [24000, 25000]
+total_batch_size: 16
+ema_decay: 0.9996
+pseudo_class_threshold: 0.7
+pseudo_mask_threshold: 0.5
+unsupervised_loss_weight: 2.0
+burnin_iter: 3000  # inferred from upstream debug comment; not stated in paper
