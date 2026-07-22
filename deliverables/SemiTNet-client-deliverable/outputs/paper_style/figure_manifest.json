@@ -11,8 +11,20 @@
       "source_files": [
         "outputs/final/run_manifest.json"
       ],
-      "data_kind": "structural",
-      "fabricated_values": false
+      "data_kind": "published_reference_structure",
+      "fabricated_values": false,
+      "fabricated_predictions": false
+    },
+    {
+      "figure": 1.1,
+      "path": "outputs/paper_style/figures/figure_01b_implemented_reduced_architecture.png",
+      "paper_counterpart": "Figure 1b",
+      "source_files": [
+        "outputs/final/run_manifest.json"
+      ],
+      "data_kind": "implemented_structure",
+      "fabricated_values": false,
+      "fabricated_predictions": false
     },
     {
       "figure": 2,
@@ -22,8 +34,9 @@
         "outputs/final/run_manifest.json",
         "outputs/final/metrics.json"
       ],
-      "data_kind": "structural",
-      "fabricated_values": false
+      "data_kind": "published_reference_structure_mapped_to_measured_workflow",
+      "fabricated_values": false,
+      "fabricated_predictions": false
     },
     {
       "figure": 3,
@@ -33,7 +46,8 @@
         "outputs/final/history.csv"
       ],
       "data_kind": "measured",
-      "fabricated_values": false
+      "fabricated_values": false,
+      "fabricated_predictions": false
     },
     {
       "figure": 4,
@@ -45,8 +59,20 @@
         "paper/reference/table3_groups.csv",
         "paper/reference/paper_targets.json"
       ],
-      "data_kind": "published_reference_plus_measured",
-      "fabricated_values": false
+      "data_kind": "published_reference",
+      "fabricated_values": false,
+      "fabricated_predictions": false
+    },
+    {
+      "figure": "4b",
+      "path": "outputs/paper_style/figures/figure_04b_measured_reduced_simulation.png",
+      "paper_counterpart": "Figure 4b",
+      "source_files": [
+        "outputs/final/metrics.json"
+      ],
+      "data_kind": "measured",
+      "fabricated_values": false,
+      "fabricated_predictions": false
     },
     {
       "figure": 5,
@@ -55,8 +81,20 @@
       "source_files": [
         "outputs/final/figures/predictions.png"
       ],
+      "data_kind": "measured_plus_explicit_unavailable_placeholders",
+      "fabricated_values": false,
+      "fabricated_predictions": false
+    },
+    {
+      "figure": 5.1,
+      "path": "outputs/paper_style/figures/figure_05b_measured_qualitative_only.png",
+      "paper_counterpart": "Figure 5b",
+      "source_files": [
+        "outputs/final/figures/predictions.png"
+      ],
       "data_kind": "measured",
-      "fabricated_values": false
+      "fabricated_values": false,
+      "fabricated_predictions": false
     }
   ]
 }

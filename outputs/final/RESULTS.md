@@ -7,9 +7,12 @@ The dataset download was verified before simulation: 598 panoramic images and to
 - Labeled training images: 60
 - Label-hidden pseudo-label images: 20
 - Held-out test images: 16
-- IoU: 0.00%
-- Dice: 0.00%
-- Precision: 0.00%
-- Recall: 0.00%
-- F1: 0.00%
-- Runtime: 27.7 seconds
+- Selected checkpoint: student
+- Collapse guard triggered: False
+- Confident pseudo-label pixels used: 0
+- IoU: 33.06%
+- Dice: 49.69%
+- Precision: 12.53%
+- Recall: 12.03%
+- F1: 12.27%
+- Runtime: 41.6 seconds

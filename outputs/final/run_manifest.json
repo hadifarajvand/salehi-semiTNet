@@ -9,11 +9,15 @@
     "pseudo-label generation",
     "student training",
     "EMA teacher update",
+    "collapse guard",
     "held-out evaluation"
   ],
   "split": {
     "train_labeled": 60,
     "pseudo_unlabeled": 20,
     "test": 16
-  }
+  },
+  "selected_checkpoint": "student",
+  "pseudo_threshold": 0.35,
+  "unsupervised_weight": 0.05
 }
