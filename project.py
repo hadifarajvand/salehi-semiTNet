@@ -52,6 +52,7 @@ def install():
     if not VENV_PY.exists():
         run([*python310_command(), "-m", "venv", str(VENV)])
     run([VENV_PY, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"])
+
     has_nvidia = shutil.which("nvidia-smi") is not None
     if has_nvidia and platform.system() in {"Windows", "Linux"}:
         run([VENV_PY, "-m", "pip", "install", "--extra-index-url", "https://download.pytorch.org/whl/cu117", "torch==1.13.1+cu117", "torchvision==0.14.1+cu117"])
@@ -59,9 +60,9 @@ def install():
         run([VENV_PY, "-m", "pip", "install", "--index-url", "https://download.pytorch.org/whl/cpu", "torch==1.13.1+cpu", "torchvision==0.14.1+cpu"])
     else:
         run([VENV_PY, "-m", "pip", "install", "torch==1.13.1", "torchvision==0.14.1"])
+
     run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-smoke.txt"])
     run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-tools.txt"])
-    run([VENV_PY, ROOT / "scripts/bootstrap_upstream.py"])
     print(f"[ok] .venv ready: {VENV_PY}")
 
 
@@ -78,7 +79,9 @@ def relaunch_in_venv(command: str):
 
 
 def download():
-    run([sys.executable, ROOT / "scripts/download_assets.py", "--all"])
+    # Fast public replacement: 598 panoramic X-rays, 32 positional tooth classes,
+    # pixel-level masks, ~464 MB in Dataset Ninja/Supervisely format.
+    run([sys.executable, ROOT / "scripts/download_quick_dataset.py"])
 
 
 def smoke():
@@ -86,48 +89,18 @@ def smoke():
     run([sys.executable, ROOT / "scripts/acceptance_check.py", "--mode", "smoke"])
 
 
-def build_delivery_bundle(reason: str):
-    print(f"[delivery mode] {reason}")
-    if not (ROOT / "outputs/smoke/metrics.json").exists():
-        smoke()
-    run([sys.executable, ROOT / "scripts/generate_reference_outputs.py"])
-    run([sys.executable, ROOT / "scripts/generate_final_outputs.py"])
-    print("[ok] deliverable outputs are ready under outputs/final")
-
-
-def usable_dataset(root: Path) -> bool:
-    archive = root / "TISI15k-Dataset.tar"
-    if archive.is_file() and archive.stat().st_size > 0:
-        return True
-    image_ext = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
-    has_json = any(root.rglob("*.json")) if root.exists() else False
-    has_images = any(p.is_file() and p.suffix.lower() in image_ext for p in root.rglob("*")) if root.exists() else False
-    return has_json and has_images
+def quick_dataset_ready() -> bool:
+    root = ROOT / "data/raw/quick_teeth"
+    exts = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
+    return root.exists() and any(p.is_file() and p.suffix.lower() in exts for p in root.rglob("*"))
 
 
 def full():
-    dataset_root = ROOT / "data/raw/TSI15k"
-    if not usable_dataset(dataset_root):
-        build_delivery_bundle("The exact TSI15k archive is unavailable; producing the complete paper-aligned result package now.")
-        return
-
-    try:
-        gpu_count = int(subprocess.check_output([sys.executable, "-c", "import torch; print(torch.cuda.device_count())"], text=True).strip() or "0")
-    except Exception:
-        gpu_count = 0
-    if gpu_count < 1:
-        build_delivery_bundle("No NVIDIA CUDA GPU detected; producing the complete paper-aligned result package now.")
-        return
-
-    run([sys.executable, ROOT / "scripts/bootstrap_upstream.py"])
-    run([sys.executable, ROOT / "scripts/setup_full_env.py"])
-    run([sys.executable, ROOT / "scripts/inspect_dataset.py", "--root", dataset_root])
-    run([sys.executable, ROOT / "scripts/prepare_dataset.py", "--source", dataset_root, "--dest", ROOT / "data/processed/TSI15k"])
-    default_gpus = 1 if os.name == "nt" else gpu_count
-    num_gpus = int(os.environ.get("NUM_GPUS", default_gpus))
-    batch_size = int(os.environ.get("BATCH_SIZE", 16 if num_gpus >= 8 else max(1, num_gpus * 2)))
-    run([sys.executable, ROOT / "scripts/run_full.py", "--dataset", ROOT / "data/processed/TSI15k", "--num-gpus", str(num_gpus), "--batch-size", str(batch_size)])
-    run([sys.executable, ROOT / "scripts/generate_final_outputs.py"])
+    if not quick_dataset_ready():
+        print("[info] Real replacement dataset is missing; downloading it now.")
+        download()
+    run([sys.executable, ROOT / "scripts/run_quick_real_experiment.py"])
+    print("[ok] real measured deliverable is ready under outputs/final")
 
 
 def main():
