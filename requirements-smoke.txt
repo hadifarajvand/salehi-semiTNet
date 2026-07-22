@@ -3,3 +3,5 @@ Pillow>=9.5
 matplotlib>=3.7
 PyYAML>=6.0
 pandas>=2.0
+requests>=2.31
+tqdm>=4.66
