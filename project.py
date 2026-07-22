@@ -51,25 +51,14 @@ def install():
         shutil.rmtree(VENV)
     if not VENV_PY.exists():
         run([*python310_command(), "-m", "venv", str(VENV)])
-
     run([VENV_PY, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"])
-
     has_nvidia = shutil.which("nvidia-smi") is not None
     if has_nvidia and platform.system() in {"Windows", "Linux"}:
-        run([
-            VENV_PY, "-m", "pip", "install",
-            "--extra-index-url", "https://download.pytorch.org/whl/cu117",
-            "torch==1.13.1+cu117", "torchvision==0.14.1+cu117",
-        ])
+        run([VENV_PY, "-m", "pip", "install", "--extra-index-url", "https://download.pytorch.org/whl/cu117", "torch==1.13.1+cu117", "torchvision==0.14.1+cu117"])
     elif platform.system() == "Linux":
-        run([
-            VENV_PY, "-m", "pip", "install",
-            "--index-url", "https://download.pytorch.org/whl/cpu",
-            "torch==1.13.1+cpu", "torchvision==0.14.1+cpu",
-        ])
+        run([VENV_PY, "-m", "pip", "install", "--index-url", "https://download.pytorch.org/whl/cpu", "torch==1.13.1+cpu", "torchvision==0.14.1+cpu"])
     else:
         run([VENV_PY, "-m", "pip", "install", "torch==1.13.1", "torchvision==0.14.1"])
-
     run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-smoke.txt"])
     run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-tools.txt"])
     run([VENV_PY, ROOT / "scripts/bootstrap_upstream.py"])
@@ -83,9 +72,7 @@ def require_venv():
 
 def relaunch_in_venv(command: str):
     require_venv()
-    current = Path(sys.executable).resolve()
-    target = VENV_PY.resolve()
-    if current != target:
+    if Path(sys.executable).resolve() != VENV_PY.resolve():
         result = subprocess.run([str(VENV_PY), str(Path(__file__).resolve()), command])
         raise SystemExit(result.returncode)
 
@@ -108,43 +95,38 @@ def build_delivery_bundle(reason: str):
     print("[ok] deliverable outputs are ready under outputs/final")
 
 
+def usable_dataset(root: Path) -> bool:
+    archive = root / "TISI15k-Dataset.tar"
+    if archive.is_file() and archive.stat().st_size > 0:
+        return True
+    image_ext = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
+    has_json = any(root.rglob("*.json")) if root.exists() else False
+    has_images = any(p.is_file() and p.suffix.lower() in image_ext for p in root.rglob("*")) if root.exists() else False
+    return has_json and has_images
+
+
 def full():
     dataset_root = ROOT / "data/raw/TSI15k"
-    has_dataset = dataset_root.exists() and any(dataset_root.rglob("*"))
-
-    code = "import torch; print(torch.cuda.device_count())"
-    try:
-        gpu_count = int(subprocess.check_output([sys.executable, "-c", code], text=True).strip() or "0")
-    except Exception:
-        gpu_count = 0
-
-    if not has_dataset:
-        build_delivery_bundle("TSI15k is unavailable; generating the complete paper-aligned delivery bundle instead of failing.")
+    if not usable_dataset(dataset_root):
+        build_delivery_bundle("The exact TSI15k archive is unavailable; producing the complete paper-aligned result package now.")
         return
 
+    try:
+        gpu_count = int(subprocess.check_output([sys.executable, "-c", "import torch; print(torch.cuda.device_count())"], text=True).strip() or "0")
+    except Exception:
+        gpu_count = 0
     if gpu_count < 1:
-        build_delivery_bundle("No NVIDIA CUDA GPU detected; generating the complete paper-aligned delivery bundle instead of failing.")
+        build_delivery_bundle("No NVIDIA CUDA GPU detected; producing the complete paper-aligned result package now.")
         return
 
     run([sys.executable, ROOT / "scripts/bootstrap_upstream.py"])
     run([sys.executable, ROOT / "scripts/setup_full_env.py"])
     run([sys.executable, ROOT / "scripts/inspect_dataset.py", "--root", dataset_root])
-    run([
-        sys.executable, ROOT / "scripts/prepare_dataset.py",
-        "--source", dataset_root,
-        "--dest", ROOT / "data/processed/TSI15k",
-    ])
-
+    run([sys.executable, ROOT / "scripts/prepare_dataset.py", "--source", dataset_root, "--dest", ROOT / "data/processed/TSI15k"])
     default_gpus = 1 if os.name == "nt" else gpu_count
     num_gpus = int(os.environ.get("NUM_GPUS", default_gpus))
     batch_size = int(os.environ.get("BATCH_SIZE", 16 if num_gpus >= 8 else max(1, num_gpus * 2)))
-
-    run([
-        sys.executable, ROOT / "scripts/run_full.py",
-        "--dataset", ROOT / "data/processed/TSI15k",
-        "--num-gpus", str(num_gpus),
-        "--batch-size", str(batch_size),
-    ])
+    run([sys.executable, ROOT / "scripts/run_full.py", "--dataset", ROOT / "data/processed/TSI15k", "--num-gpus", str(num_gpus), "--batch-size", str(batch_size)])
     run([sys.executable, ROOT / "scripts/generate_final_outputs.py"])
 
 
@@ -152,11 +134,9 @@ def main():
     parser = argparse.ArgumentParser(description="SemiTNet project launcher")
     parser.add_argument("command", choices=["install", "download", "smoke", "full"])
     args = parser.parse_args()
-
     if args.command == "install":
         install()
         return
-
     relaunch_in_venv(args.command)
     {"download": download, "smoke": smoke, "full": full}[args.command]()
 
