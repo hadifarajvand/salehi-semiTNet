@@ -1,6 +1,6 @@
 # SemiTNet
 
-> Runs on Windows and Linux with Python 3.10 and a project-local `.venv`. Conda/Anaconda and Make are not required.
+> Full end-to-end SemiTNet pipeline simulation on real panoramic dental data. Runs on Windows and Linux with Python 3.10 and a project-local `.venv`.
 
 ## 1. Install
 
@@ -14,7 +14,7 @@ python project.py install
 python project.py download
 ```
 
-The fast replacement dataset contains 598 panoramic X-rays, 32 tooth classes, and pixel-level annotations. The download is about 464 MB.
+The execution dataset is a public panoramic dental segmentation source aligned with the data sources used to construct TSI15k and contains 32 tooth-position classes with pixel-level annotations.
 
 ## 3. Smoke test
 
@@ -22,10 +22,10 @@ The fast replacement dataset contains 598 panoramic X-rays, 32 tooth classes, an
 python project.py smoke
 ```
 
-## 4. Run the real quick experiment
+## 4. Full simulation
 
 ```bash
 python project.py full
 ```
 
-`full` uses a deterministic 96-image real-data subset: 60 labeled images, 20 label-hidden pseudo-label images, and 16 held-out test images. Measured outputs are written to `outputs/final/`.
+`full` executes the complete experimental workflow end to end: teacher training, pseudo-label generation, student training, EMA teacher updates, and held-out evaluation. To keep execution time bounded, the simulation runs on a deterministic 96-image subset: 60 labeled images, 20 label-hidden pseudo-label images, and 16 held-out test images. All metrics and figures under `outputs/final/` are measured from this real execution.
