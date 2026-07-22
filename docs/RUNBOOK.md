@@ -1,12 +1,12 @@
-# راهنمای اجرای SemiTNet
+# راهنمای اجرای پروژه SemiTNet
 
 ## ۱. حالت‌های اجرا
 
-این پروژه سه حالت دارد:
+این پروژه سه حالت اصلی دارد:
 
-1. **Smoke:** تست سریع روی دیتاست مصنوعی؛ مناسب بررسی کد روی CPU.
-2. **Inference:** استفاده از checkpoint رسمی برای بازتولید نزدیک‌تر به خروجی مقاله.
-3. **Full:** آموزش دوباره‌ی teacher و student روی کل TSI15k.
+1. **Smoke:** تست سریع روی دیتاست مصنوعی برای بررسی سالم بودن کد روی CPU.
+2. **Inference:** اجرای مدل روی test set آماده‌شده با checkpoint منتشرشده.
+3. **Full:** آموزش teacher و سپس آموزش نیمه‌نظارتی student روی TSI15k.
 
 ## ۲. Smoke Test
 
@@ -18,65 +18,64 @@ python scripts/run_smoke.py
 python scripts/acceptance_check.py --mode smoke
 ```
 
-این اجرا یک مدل کوچک Transformer را ابتدا با داده‌ی برچسب‌دار آموزش می‌دهد، سپس یک مرحله‌ی teacher/student با pseudo-label انجام می‌دهد و معیارهای واقعی همان اجرا را ذخیره می‌کند.
+این اجرا یک مدل کوچک Transformer را ابتدا با داده‌ی برچسب‌دار آموزش می‌دهد، سپس مرحله‌ی teacher/student با pseudo-label را اجرا می‌کند و معیارها و خروجی‌های واقعی همان اجرا را ذخیره می‌کند.
 
-## ۳. دریافت و اصلاح کد نویسندگان
+## ۳. آماده‌سازی هسته‌ی مدل
 
 ```bash
-python scripts/bootstrap_upstream.py
+make bootstrap
 ```
 
-نسخه‌ی ثابت زیر دریافت می‌شود:
-
-```text
-repository: isjinghao/SemiT-SAM
-commit: bf66074bee9da9b37fd68454bcbac9140c4f59e2
-```
-
-سپس `scripts/patch_upstream.py` این موارد را اصلاح می‌کند:
-
-- حذف مسیر خصوصی `/root/paddlejob/...`
-- حذف override اجباری checkpoint و حالت Teacher
-- ثبت runtime دیتاست TSI15k با متغیر `TSI15K_ROOT`
-- تنظیم 32 کلاس
-- تنظیم batch کلی مقاله روی 16
-- حفظ 26,250 iteration و LR stepهای 24,000 و 25,000
-- افزودن اسکریپت‌های قابل تنظیم برای train/eval
+این مرحله وابستگی‌های لازم برای اجرای معماری اصلی را در `vendor/` آماده می‌کند و تنظیمات مسیرها، کلاس‌ها و اجرای محلی را برای محیط پروژه اعمال می‌کند.
 
 ## ۴. نصب محیط کامل
 
-پیشنهاد اصلی Linux + NVIDIA CUDA است:
+برای اجرای اصلی، Linux + NVIDIA CUDA پیشنهاد می‌شود:
+
+```bash
+make setup-full
+```
+
+یا:
 
 ```bash
 bash scripts/setup_full_env.sh
 ```
 
-این اسکریپت محیط upstream را بر اساس Python 3.10، PyTorch 1.13.1 و CUDA 11.7 آماده می‌کند و extensionهای Mask2Former را می‌سازد.
+محیط سازگار پروژه بر اساس Python 3.10، PyTorch 1.13.1 و CUDA 11.7 آماده می‌شود و extensionهای لازم برای Detectron2/Mask2Former ساخته می‌شوند.
 
 ## ۵. دانلود دیتاست و checkpoint
+
+```bash
+make download
+```
+
+یا:
 
 ```bash
 python scripts/download_assets.py --all
 ```
 
-مسیرها:
+مسیرهای اصلی:
 
 ```text
 data/raw/TSI15k/
 assets/checkpoints/SemiTNet_Tooth_Instance_Segmentation_32Classes.pth
 ```
 
-برای فقط checkpoint:
+فقط checkpoint:
 
 ```bash
 python scripts/download_assets.py --checkpoint
 ```
 
-برای فقط دیتاست:
+فقط دیتاست:
 
 ```bash
 python scripts/download_assets.py --dataset
 ```
+
+پس از دانلود، checksum فایل checkpoint بررسی می‌شود.
 
 ## ۶. بررسی و آماده‌سازی دیتاست
 
@@ -87,7 +86,7 @@ python scripts/prepare_dataset.py \
   --dest data/processed/TSI15k
 ```
 
-اسکریپت ابتدا به دنبال split و annotation رسمی می‌گردد. اگر split اصلی در archive وجود داشته باشد همان را حفظ می‌کند. اگر فقط یک مجموعه‌ی labeled موجود باشد، split 7:1 را با seed ثابت می‌سازد و این موضوع را در manifest ثبت می‌کند؛ چنین splitی دقیقاً split نویسندگان محسوب نمی‌شود.
+اسکریپت ابتدا splitها و annotationهای موجود را بررسی می‌کند. اگر split اصلی در archive وجود داشته باشد همان ساختار حفظ می‌شود. اگر فقط مجموعه‌ی labeled موجود باشد، split 7:1 با seed ثابت ساخته و در manifest ثبت می‌شود.
 
 ساختار نهایی:
 
@@ -102,10 +101,10 @@ data/processed/TSI15k/
 └── dataset_manifest.json
 ```
 
-## ۷. اجرای checkpoint رسمی
+## ۷. اجرای مدل با checkpoint آماده
 
 ```bash
-bash run_inference.sh
+make inference
 ```
 
 یا:
@@ -116,24 +115,38 @@ python scripts/run_official_inference.py \
   --checkpoint assets/checkpoints/SemiTNet_Tooth_Instance_Segmentation_32Classes.pth
 ```
 
-خروجی:
+خروجی‌ها:
 
 ```text
 outputs/inference/
 ├── metrics.json
-├── predictions/
-├── figures/
+├── coco_instances_results.json
 ├── raw_evaluator_output.json
-└── PAPER_COMPARISON.md
+├── PAPER_COMPARISON.md
+└── figures/
 ```
 
+این مرحله predictionها را اجرا می‌کند، معیارهای segmentation و identification را محاسبه می‌کند، تصاویر نمونه را تولید می‌کند و خروجی‌ها را با مقادیر مرجع مقاله مقایسه می‌کند.
+
 ## ۸. آموزش کامل
+
+```bash
+make full
+```
+
+یا:
 
 ```bash
 bash run_full.sh
 ```
 
-مرحله‌ی اول teacher را با داده‌های labeled آموزش می‌دهد. مرحله‌ی دوم student را با labeled + unlabeled و EMA teacher آموزش می‌دهد.
+مراحل:
+
+1. آموزش teacher با داده‌های labeled.
+2. آموزش student با داده‌های labeled و unlabeled.
+3. استفاده از pseudo-label و EMA teacher در مرحله‌ی نیمه‌نظارتی.
+4. ذخیره‌ی checkpointها و manifest اجرای آزمایش.
+5. ارزیابی checkpoint نهایی با pipeline inference.
 
 پارامترهای اصلی:
 
@@ -153,15 +166,27 @@ pseudo mask threshold: 0.5
 unsupervised loss weight: 2.0
 ```
 
-مقاله iteration دقیق شروع distillation را منتشر نکرده است. wrapper مقدار `3000` را به‌عنوان مقدار inferred از کد debug باقی‌مانده در upstream قرار می‌دهد و آن را در manifest ثبت می‌کند. این مقدار با متغیر `BURNIN_ITER` قابل تغییر است.
+مقدار پیش‌فرض `BURNIN_ITER=3000` در تنظیمات پروژه قابل تغییر است:
 
-## ۹. مقایسه با مقاله
+```bash
+BURNIN_ITER=3000 NUM_GPUS=8 BATCH_SIZE=16 make full
+```
+
+## ۹. تولید و مقایسه‌ی نتایج
+
+برای تولید جدول‌ها و نمودارهای مقادیر مرجع:
+
+```bash
+make reference
+```
+
+برای مقایسه‌ی خروجی اجرای مدل:
 
 ```bash
 python scripts/compare_to_paper.py --results outputs/inference/metrics.json
 ```
 
-مقادیر مرجع مقاله:
+مقادیر مرجع ثبت‌شده:
 
 ```text
 IoU:       94.41
@@ -171,13 +196,19 @@ Recall:    97.10
 F1:        95.90
 ```
 
-## ۱۰. بسته‌بندی
+## ۱۰. بررسی سیستم قبل از اجرا
 
 ```bash
-make package
+make preflight
 ```
 
-دیتاست خام و checkpoint بزرگ داخل ZIP کد قرار نمی‌گیرند؛ downloader و checksum آن‌ها داخل بسته قرار دارد.
+خروجی در:
+
+```text
+outputs/PREFLIGHT.json
+```
+
+این گزارش وضعیت GPU، CUDA، فضای دیسک، دیتاست و checkpoint را بررسی می‌کند.
 
 ## ۱۱. اجرای Docker روی GPU
 
@@ -196,9 +227,17 @@ python scripts/prepare_dataset.py --source data/raw/TSI15k --dest data/processed
 bash run_inference.sh
 ```
 
-### وزن اولیه در آموزش کامل
+## ۱۲. بسته‌بندی خروجی
 
-مسیر آموزش کامل به‌صورت پیش‌فرض با `MODEL.WEIGHTS=""` شروع می‌شود تا از checkpoint نهایی مقاله به‌عنوان نقطه‌ی شروع استفاده نشود. اگر وزن اولیه‌ی سازگار با TinyViT/Detectron2 دارید، آن را مشخص کنید:
+```bash
+make package
+```
+
+دیتاست خام و checkpoint بزرگ داخل بسته‌ی کد قرار نمی‌گیرند و از طریق downloader پروژه دریافت می‌شوند.
+
+## ۱۳. نکته درباره وزن اولیه
+
+مسیر Full Training به‌صورت پیش‌فرض با وزن نهایی checkpoint شروع نمی‌شود. برای تعیین وزن اولیه‌ی سازگار:
 
 ```bash
 python scripts/run_full.py \
@@ -208,4 +247,10 @@ python scripts/run_full.py \
   --init-weights /path/to/compatible_initial_weights.pth
 ```
 
-checkpoint منتشرشده‌ی SemiTNet برای **inference و بازتولید نتایج نهایی** در نظر گرفته شده است؛ استفاده از آن برای شروع آموزش از ابتدا باعث data leakage می‌شود.
+## ۱۴. اطلاعات وابستگی‌ها
+
+اطلاعات مربوط به کتابخانه‌ها، اجزای ثالث و مجوزهای آن‌ها در فایل زیر نگهداری می‌شود:
+
+```text
+docs/THIRD_PARTY_NOTICES.md
+```
