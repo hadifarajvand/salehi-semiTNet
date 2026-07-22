@@ -1,0 +1,53 @@
+name: full-real-data-simulation
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  full-simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Environment preflight
+        run: |
+          python --version
+          uname -a
+          df -h
+
+      - name: Install project
+        run: python project.py install
+
+      - name: Download and verify exact dataset
+        run: |
+          source .venv/bin/activate
+          python project.py download 2>&1 | tee dataset_download.log
+
+      - name: Run fixed full simulation
+        run: |
+          source .venv/bin/activate
+          python project.py full 2>&1 | tee full_simulation.log
+
+      - name: Print measured metrics
+        run: cat outputs/final/metrics.json
+
+      - name: Upload validated client deliverable
+        uses: actions/upload-artifact@v4
+        with:
+          name: SemiTNet-client-deliverable
+          path: |
+            SemiTNet-client-deliverable.zip
+            outputs/final
+            data/raw/quick_teeth/download_manifest.json
+            data/processed/quick_teeth/split_manifest.json
+            dataset_download.log
+            full_simulation.log
+          if-no-files-found: error
+          retention-days: 30
