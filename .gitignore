@@ -15,3 +15,8 @@ outputs/inference/
 *.tar
 *.tar.gz
 *.zip
+
+# Large TED3 research inputs — never commit or package these archives.
+TED3-train.tar
+TED3-test.tar
+TED3-unlabeled-data-15k-pseudo-mask.tar
