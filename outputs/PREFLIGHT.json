@@ -1,0 +1,20 @@
+{
+  "python": "3.13.5",
+  "platform": "Linux-4.4.0-x86_64-with-glibc2.41",
+  "upstream_patched": false,
+  "dataset_prepared": false,
+  "released_checkpoint": false,
+  "disk_free_gb": null,
+  "torch": "2.10.0+cpu",
+  "cuda_available": false,
+  "gpu_count": 0,
+  "gpus": [],
+  "paper_reference": {
+    "hardware": "8x V100 32GB",
+    "training_time_hours": 6,
+    "iterations": 26250,
+    "batch_total": 16,
+    "inference_fps": 0.658
+  },
+  "recommendation": "smoke only here; use Linux NVIDIA GPU for inference/full training"
+}

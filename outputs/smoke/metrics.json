@@ -1,0 +1,13 @@
+{
+  "iou": 69.71070403465939,
+  "dice": 82.13137828493737,
+  "precision": 70.34233687214319,
+  "recall": 98.72414022114401,
+  "f1": 82.13137779912074,
+  "mode": "synthetic_smoke",
+  "runtime_seconds": 3.797274112701416,
+  "device": "cpu",
+  "labeled_train": 24,
+  "unlabeled_train": 24,
+  "validation": 8
+}

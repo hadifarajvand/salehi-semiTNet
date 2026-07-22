@@ -1,0 +1,18 @@
+{
+  "config": {
+    "seed": 2026,
+    "image_height": 64,
+    "image_width": 128,
+    "train_labeled": 24,
+    "train_unlabeled": 24,
+    "validation": 8,
+    "teacher_epochs": 6,
+    "student_epochs": 4,
+    "batch_size": 4,
+    "learning_rate": 0.001,
+    "pseudo_threshold": 0.45,
+    "ema_decay": 0.99
+  },
+  "model": "TinySemiTransformer",
+  "meaning": "software smoke only; not a TSI15k or paper result"
+}
