@@ -8,13 +8,24 @@
 python project.py install
 ```
 
-## ۲. دانلود دیتاست
+## ۲. دانلود و آماده‌سازی دیتاست
 
 ```bash
 python project.py download
 ```
 
-داده‌ی مورد استفاده از یکی از منابع عمومی هم‌راستا با ساخت TSI15k انتخاب شده و شامل تصاویر پانورامیک، 32 کلاس دندان و annotation پیکسلی است.
+این دستور دقیقاً دیتاست `Teeth Segmentation on Dental X-ray Images` را از Dataset Ninja/ Humans in the Loop دریافت می‌کند و قبل از استفاده بررسی می‌کند که دیتاست شامل 598 تصویر و کلاس‌های دندان 1 تا 32 باشد.
+
+پس از دانلود:
+
+- نسخه خام در `data/raw/quick_teeth/` نگهداری می‌شود.
+- اطلاعات اعتبارسنجی در `data/raw/quick_teeth/download_manifest.json` ذخیره می‌شود.
+- split ثابت شبیه‌سازی به‌صورت خودکار در `data/processed/quick_teeth/` ساخته می‌شود.
+- مشخصات دقیق split در `data/processed/quick_teeth/split_manifest.json` ذخیره می‌شود.
+- split اجرا: 60 تصویر labeled، 20 تصویر label-hidden برای pseudo-label و 16 تصویر test.
+- annotation تصاویر pseudo-label وارد ورودی آموزش نمی‌شود تا leakage رخ ندهد.
+
+اگر فایل‌های موجود ناقص یا مربوط به دیتاست دیگری باشند، دستور download متوقف می‌شود و اجازه اجرای simulation را نمی‌دهد.
 
 ## ۳. Smoke Test
 
@@ -28,4 +39,4 @@ python project.py smoke
 python project.py full
 ```
 
-اجرای `full` تمام مراحل اصلی آزمایش را به‌صورت end-to-end اجرا می‌کند: آموزش teacher، تولید pseudo-label، آموزش student، به‌روزرسانی EMA و ارزیابی نهایی. برای محدود نگه‌داشتن زمان اجرا، شبیه‌سازی روی یک subset ثابت 96 تصویری اجرا می‌شود: 60 تصویر labeled، 20 تصویر برای pseudo-label و 16 تصویر test. تمام معیارها و شکل‌های `outputs/final/` از همین اجرای واقعی محاسبه می‌شوند.
+اجرای `full` فقط از دیتاست آماده‌شده و manifest تأییدشده استفاده می‌کند و مراحل teacher training، pseudo-label generation، student training، EMA update و held-out evaluation را اجرا می‌کند. اگر دیتاست آماده نشده باشد، `full` ابتدا فرآیند download/setup را خودکار اجرا می‌کند. تمام معیارها و شکل‌های نهایی در `outputs/final/` ذخیره می‌شوند.
