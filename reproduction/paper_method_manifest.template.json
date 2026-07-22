@@ -1,0 +1,21 @@
+{
+  "dataset_name": "TSI15k",
+  "labeled_train": 1398,
+  "unlabeled_train": 14728,
+  "test_count": 191,
+  "test_identity_manifest_sha256": "FILL_AFTER_EXACT_TEST_SET_RECONSTRUCTION",
+  "input_size": 1024,
+  "input_format": "RGB",
+  "object_queries": 100,
+  "iterations": 26250,
+  "optimizer": "AdamW",
+  "base_learning_rate": 0.0001,
+  "lr_steps": [24000, 25000],
+  "total_batch_size_variant": 16,
+  "publication_compatible_architecture": true,
+  "class_mapping_sha256": "FILL_AFTER_32_CLASS_MAPPING_FREEZE",
+  "evaluator": "FILL_AFTER_G1_EVALUATOR_FREEZE",
+  "environment_lock_sha256": "FILL_AFTER_ENVIRONMENT_LOCK",
+  "paper_code_discrepancies_resolved": false,
+  "notes": "Copy to reproduction/paper_method_manifest.json only after every placeholder is resolved and G1 has passed. Batch size 16 is the paper-faithful Variant P; current-upstream Variant U must be recorded separately if run."
+}
