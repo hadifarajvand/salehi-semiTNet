@@ -34,9 +34,24 @@ def python310_command():
     raise SystemExit("Python 3.10 is required. Install Python 3.10 and run this command again.")
 
 
+def venv_is_python310() -> bool:
+    if not VENV_PY.exists():
+        return False
+    probe = subprocess.run(
+        [str(VENV_PY), "-c", "import sys; raise SystemExit(0 if sys.version_info[:2]==(3,10) else 1)"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    return probe.returncode == 0
+
+
 def install():
+    if VENV.exists() and not venv_is_python310():
+        print("[info] Recreating .venv with Python 3.10")
+        shutil.rmtree(VENV)
     if not VENV_PY.exists():
         run([*python310_command(), "-m", "venv", str(VENV)])
+
     run([VENV_PY, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"])
 
     has_nvidia = shutil.which("nvidia-smi") is not None
@@ -62,8 +77,8 @@ def install():
 
 
 def require_venv():
-    if not VENV_PY.exists():
-        raise SystemExit(".venv is missing. Run: python project.py install")
+    if not VENV_PY.exists() or not venv_is_python310():
+        raise SystemExit("Valid Python 3.10 .venv is missing. Run: python project.py install")
 
 
 def relaunch_in_venv(command: str):
@@ -102,7 +117,6 @@ def full():
     if gpu_count < 1:
         raise SystemExit("No CUDA GPU detected. Full run requires an NVIDIA CUDA GPU.")
 
-    # Single-GPU is the safest native Windows path; Linux may use all GPUs.
     default_gpus = 1 if os.name == "nt" else gpu_count
     num_gpus = int(os.environ.get("NUM_GPUS", default_gpus))
     batch_size = int(os.environ.get("BATCH_SIZE", 16 if num_gpus >= 8 else max(1, num_gpus * 2)))
