@@ -1,0 +1,19 @@
+{
+  "dataset_manifest": "data/processed/quick_teeth/split_manifest.json",
+  "dataset": "Teeth Segmentation on Dental X-ray Images",
+  "verified_total_images": 598,
+  "seed": 2024,
+  "model": "QuickSemiTransformer",
+  "workflow": [
+    "teacher supervised warm-up",
+    "pseudo-label generation",
+    "student training",
+    "EMA teacher update",
+    "held-out evaluation"
+  ],
+  "split": {
+    "train_labeled": 60,
+    "pseudo_unlabeled": 20,
+    "test": 16
+  }
+}

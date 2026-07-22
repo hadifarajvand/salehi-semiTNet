@@ -1,0 +1,25 @@
+{
+  "iou": 0.0,
+  "dice": 0.0,
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "source_kind": "measured_full_pipeline_reduced_subset",
+  "dataset": "Teeth Segmentation on Dental X-ray Images",
+  "dataset_license": "CC0 1.0",
+  "verified_dataset_images": 598,
+  "classes": 32,
+  "used_labeled_train": 60,
+  "used_label_hidden_pseudo": 20,
+  "used_test": 16,
+  "image_size": [
+    128,
+    256
+  ],
+  "runtime_seconds": 27.74653124809265,
+  "device": "cpu",
+  "note": "Measured end-to-end teacher/student simulation using the verified deterministic prepared subset."
+}
+[ok] measured outputs: /Users/hadi/Documents/GitHub/salehi-semiTNet/outputs/final
++ /Users/hadi/Documents/GitHub/salehi-semiTNet/.venv/bin/python /Users/hadi/Documents/GitHub/salehi-semiTNet/scripts/run_quick_real_experiment.py
+[ok] measured simulation outputs are ready under outputs/final

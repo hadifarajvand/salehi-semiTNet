@@ -78,10 +78,18 @@ def relaunch_in_venv(command: str):
         result = subprocess.run([str(VENV_PY), str(Path(__file__).resolve()), command])
         raise SystemExit(result.returncode)
 
+def ensure_download_tools():
+    try:
+        import dataset_tools  # noqa: F401
+    except ImportError:
+        print("[info] download tools missing; installing requirements-tools.txt")
+        run([VENV_PY, "-m", "pip", "install", "-r", ROOT / "requirements-tools.txt"])
+
 
 def download():
     # Exact named public dataset used for the reduced simulation execution.
     # The downloader verifies 598 images and tooth classes 1..32 before setup.
+    ensure_download_tools()
     run([sys.executable, ROOT / "scripts/download_quick_dataset.py"])
     run([sys.executable, ROOT / "scripts/prepare_quick_dataset.py"])
     print("[ok] dataset downloaded, verified, split, and ready for simulation")

@@ -1,0 +1,633 @@
+{
+  "dataset": "Teeth Segmentation on Dental X-ray Images",
+  "publisher": "Humans in the Loop",
+  "distribution": "Dataset Ninja / Supervisely format",
+  "license": "CC0 1.0",
+  "verified_total_images": 598,
+  "verified_images_with_objects": 595,
+  "verified_classes": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
+    "30",
+    "31",
+    "32"
+  ],
+  "seed": 2024,
+  "split": {
+    "train_labeled": 60,
+    "pseudo_unlabeled": 20,
+    "test": 16
+  },
+  "note": "Pseudo-label images are copied without annotations into the prepared simulation input so their labels are not consumed during training.",
+  "files": {
+    "train_labeled": [
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/000_426.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/000_426.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/426.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/426.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/001_409.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/001_409.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/409.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/409.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/002_565.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/002_565.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/565.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/565.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/003_107.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/003_107.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/107.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/107.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/004_248.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/004_248.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/248.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/248.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/005_42.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/005_42.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/42.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/42.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/006_169.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/006_169.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/169.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/169.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/007_109.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/007_109.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/109.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/109.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/008_151.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/008_151.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/151.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/151.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/009_119.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/009_119.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/119.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/119.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/010_17.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/010_17.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/17.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/17.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/011_255.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/011_255.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/255.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/255.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/012_418.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/012_418.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/418.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/418.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/013_32.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/013_32.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/32.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/32.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/014_357.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/014_357.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/357.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/357.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/015_140.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/015_140.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/140.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/140.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/016_100.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/016_100.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/100.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/100.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/017_179.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/017_179.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/179.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/179.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/018_303.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/018_303.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/303.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/303.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/019_82.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/019_82.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/82.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/82.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/020_305.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/020_305.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/305.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/305.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/021_497.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/021_497.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/497.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/497.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/022_120.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/022_120.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/120.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/120.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/023_370.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/023_370.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/370.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/370.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/024_514.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/024_514.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/514.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/514.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/025_391.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/025_391.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/391.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/391.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/026_339.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/026_339.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/339.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/339.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/027_477.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/027_477.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/477.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/477.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/028_446.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/028_446.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/446.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/446.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/029_461.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/029_461.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/461.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/461.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/030_57.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/030_57.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/57.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/57.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/031_6.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/031_6.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/6.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/6.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/032_2.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/032_2.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/2.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/2.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/033_360.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/033_360.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/360.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/360.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/034_369.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/034_369.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/369.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/369.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/035_503.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/035_503.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/503.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/503.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/036_117.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/036_117.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/117.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/117.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/037_449.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/037_449.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/449.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/449.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/038_118.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/038_118.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/118.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/118.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/039_330.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/039_330.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/330.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/330.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/040_55.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/040_55.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/55.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/55.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/041_212.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/041_212.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/212.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/212.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/042_14.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/042_14.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/14.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/14.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/043_238.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/043_238.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/238.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/238.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/044_559.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/044_559.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/559.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/559.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/045_193.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/045_193.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/193.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/193.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/046_223.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/046_223.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/223.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/223.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/047_390.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/047_390.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/390.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/390.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/048_402.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/048_402.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/402.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/402.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/049_412.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/049_412.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/412.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/412.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/050_262.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/050_262.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/262.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/262.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/051_501.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/051_501.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/501.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/501.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/052_207.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/052_207.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/207.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/207.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/053_27.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/053_27.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/27.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/27.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/054_295.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/054_295.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/295.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/295.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/055_126.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/055_126.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/126.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/126.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/056_72.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/056_72.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/72.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/72.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/057_93.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/057_93.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/93.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/93.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/058_260.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/058_260.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/260.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/260.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/train_labeled/img/059_101.jpg",
+        "annotation": "data/processed/quick_teeth/train_labeled/ann/059_101.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/101.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/101.jpg.json"
+      }
+    ],
+    "pseudo_unlabeled": [
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/000_521.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/521.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/001_528.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/528.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/002_54.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/54.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/003_68.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/68.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/004_281.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/281.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/005_490.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/490.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/006_194.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/194.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/007_218.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/218.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/008_535.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/535.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/009_464.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/464.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/010_349.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/349.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/011_46.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/46.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/012_165.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/165.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/013_499.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/499.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/014_474.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/474.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/015_326.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/326.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/016_436.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/436.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/017_67.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/67.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/018_566.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/566.jpg",
+        "source_annotation": null
+      },
+      {
+        "image": "data/processed/quick_teeth/pseudo_unlabeled/img/019_271.jpg",
+        "annotation": null,
+        "source_image": "data/raw/quick_teeth/ds/img/271.jpg",
+        "source_annotation": null
+      }
+    ],
+    "test": [
+      {
+        "image": "data/processed/quick_teeth/test/img/000_346.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/000_346.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/346.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/346.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/001_297.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/001_297.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/297.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/297.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/002_232.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/002_232.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/232.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/232.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/003_89.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/003_89.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/89.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/89.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/004_266.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/004_266.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/266.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/266.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/005_545.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/005_545.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/545.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/545.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/006_35.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/006_35.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/35.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/35.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/007_550.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/007_550.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/550.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/550.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/008_317.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/008_317.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/317.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/317.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/009_546.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/009_546.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/546.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/546.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/010_522.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/010_522.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/522.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/522.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/011_40.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/011_40.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/40.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/40.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/012_133.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/012_133.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/133.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/133.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/013_378.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/013_378.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/378.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/378.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/014_276.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/014_276.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/276.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/276.jpg.json"
+      },
+      {
+        "image": "data/processed/quick_teeth/test/img/015_564.jpg",
+        "annotation": "data/processed/quick_teeth/test/ann/015_564.jpg.json",
+        "source_image": "data/raw/quick_teeth/ds/img/564.jpg",
+        "source_annotation": "data/raw/quick_teeth/ds/ann/564.jpg.json"
+      }
+    ]
+  }
+}

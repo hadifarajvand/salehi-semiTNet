@@ -3,8 +3,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import tarfile
 import shutil
 from pathlib import Path
+
+import requests
+import tqdm
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / "data/raw/quick_teeth"
@@ -13,6 +18,7 @@ DATASET_NAME = "Teeth Segmentation on Dental X-ray Images"
 EXPECTED_IMAGES = 598
 EXPECTED_CLASSES = {str(i) for i in range(1, 33)}
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
+DOWNLOAD_URL = "https://assets.supervisely.com/remote/eyJsaW5rIjogInMzOi8vc3VwZXJ2aXNlbHktZGF0YXNldHMvMTU5OF9UZWV0aCBTZWdtZW50YXRpb24gb24gRGVudGFsIFgtcmF5IEltYWdlcy90ZWV0aC1zZWdtZW50YXRpb24tb24tZGVudGFsLXgtcmF5LWltYWdlcy1EYXRhc2V0TmluamEudGFyIiwgInNpZyI6ICJsZzV2QjE5L0RzbkREam1wV2JwN3Y2Z01XT3U5c28yb0FhcllRZGV5OTZzPSJ9?response-content-disposition=attachment%3B%20filename%3D%22teeth-segmentation-on-dental-x-ray-images-DatasetNinja.tar%22"
 
 
 def inspect_dataset(root: Path):
@@ -65,6 +71,23 @@ def verify(root: Path) -> dict:
         "verified_classes": sorted(classes, key=int),
     }
 
+def download_archive(url: str, target: Path) -> None:
+    with requests.get(url, stream=True, timeout=120) as response:
+        response.raise_for_status()
+        total_size = int(response.headers.get("content-length", 0))
+        with target.open("wb") as file, tqdm.tqdm(
+            total=total_size, unit="B", unit_scale=True, desc=f"Downloading '{DATASET_NAME}'"
+        ) as pbar:
+            for chunk in response.iter_content(chunk_size=1024 * 1024):
+                if not chunk:
+                    continue
+                file.write(chunk)
+                pbar.update(len(chunk))
+
+def unpack_archive(archive_path: Path, destination: Path) -> None:
+    with tarfile.open(archive_path) as archive:
+        archive.extractall(destination)
+
 
 def main() -> None:
     ap = argparse.ArgumentParser()
@@ -83,15 +106,13 @@ def main() -> None:
     shutil.rmtree(STAGING, ignore_errors=True)
     STAGING.mkdir(parents=True, exist_ok=True)
 
-    try:
-        import dataset_tools as dtools
-    except ImportError as exc:
-        raise SystemExit("dataset-tools is missing. Run: python project.py install") from exc
-
     print(f"[download] exact dataset: {DATASET_NAME}")
     print("[expected] 598 panoramic X-rays, classes 1..32, pixel-level annotations, CC0 1.0")
     try:
-        dtools.download(dataset=DATASET_NAME, dst_dir=str(STAGING))
+        archive_path = STAGING / "dataset.tar"
+        download_archive(DOWNLOAD_URL, archive_path)
+        unpack_archive(archive_path, STAGING)
+        archive_path.unlink(missing_ok=True)
     except Exception as exc:
         shutil.rmtree(STAGING, ignore_errors=True)
         raise SystemExit(

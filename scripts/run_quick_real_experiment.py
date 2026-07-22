@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import csv
+import base64
 import json
+import io
+import zlib
 import time
 from pathlib import Path
 
@@ -20,11 +23,11 @@ OUT = ROOT / "outputs/final"
 FIG = OUT / "figures"
 H, W = 128, 256
 BATCH = 4
+TEACHER_EPOCHS = 8
+STUDENT_PASSES = 2
 
 
 def annotation_mask(ann_path: Path) -> np.ndarray:
-    import supervisely as sly
-
     ann = json.loads(ann_path.read_text())
     height = int(ann["size"]["height"])
     width = int(ann["size"]["width"])
@@ -43,7 +46,12 @@ def annotation_mask(ann_path: Path) -> np.ndarray:
             bm = obj.get("bitmap", {})
             if not bm.get("data"):
                 continue
-            local = np.asarray(sly.Bitmap.base64_2_data(bm["data"]), dtype=bool)
+            raw = base64.b64decode(bm["data"])
+            try:
+                raw = zlib.decompress(raw)
+            except zlib.error:
+                pass
+            local = np.asarray(Image.open(io.BytesIO(raw)).convert("L"), dtype=bool)
             origin = bm.get("origin", [0, 0])
             x, y = int(origin[0]), int(origin[1])
             y2, x2 = min(height, y + local.shape[0]), min(width, x + local.shape[1])
@@ -168,14 +176,14 @@ def main():
 
     device = torch.device("cpu")
     weights = torch.ones(33, device=device)
-    weights[0] = 0.15
+    weights[0] = 0.05
     loss_fn = nn.CrossEntropyLoss(weight=weights)
     history = []
     start = time.time()
 
     teacher = QuickSemiTransformer().to(device)
     opt = torch.optim.AdamW(teacher.parameters(), lr=8e-4)
-    for epoch in range(2):
+    for epoch in range(TEACHER_EPOCHS):
         loss = train_epoch(teacher, labeled, opt, loss_fn, device)
         vals = evaluate(teacher, test, device)
         history.append({"phase": "teacher", "epoch": epoch + 1, "loss": loss, **vals})
@@ -183,30 +191,31 @@ def main():
     student = QuickSemiTransformer().to(device)
     student.load_state_dict(teacher.state_dict())
     opt_s = torch.optim.AdamW(student.parameters(), lr=4e-4)
-    student.train()
-    piter = iter(pseudo)
     total = 0.0
-    for x, y in labeled:
-        try:
-            u = next(piter)
-        except StopIteration:
-            piter = iter(pseudo)
-            u = next(piter)
-        x, y, u = x.to(device), y.to(device), u.to(device)
-        with torch.no_grad():
-            probs = torch.softmax(teacher(u), 1)
-            conf, pseudo_y = probs.max(1)
-            pseudo_y = torch.where(conf >= 0.55, pseudo_y, torch.zeros_like(pseudo_y))
-        opt_s.zero_grad()
-        sup = loss_fn(student(x), y)
-        uns = loss_fn(student(u), pseudo_y)
-        loss = sup + 0.5 * uns
-        loss.backward()
-        opt_s.step()
-        total += loss.item()
-        with torch.no_grad():
-            for tp, sp in zip(teacher.parameters(), student.parameters()):
-                tp.mul_(0.99).add_(sp, alpha=0.01)
+    for _ in range(STUDENT_PASSES):
+        student.train()
+        piter = iter(pseudo)
+        for x, y in labeled:
+            try:
+                u = next(piter)
+            except StopIteration:
+                piter = iter(pseudo)
+                u = next(piter)
+            x, y, u = x.to(device), y.to(device), u.to(device)
+            with torch.no_grad():
+                probs = torch.softmax(teacher(u), 1)
+                conf, pseudo_y = probs.max(1)
+                pseudo_y = torch.where(conf >= 0.40, pseudo_y, torch.zeros_like(pseudo_y))
+            opt_s.zero_grad()
+            sup = loss_fn(student(x), y)
+            uns = loss_fn(student(u), pseudo_y)
+            loss = sup + 0.75 * uns
+            loss.backward()
+            opt_s.step()
+            total += loss.item()
+            with torch.no_grad():
+                for tp, sp in zip(teacher.parameters(), student.parameters()):
+                    tp.mul_(0.98).add_(sp, alpha=0.02)
     vals = evaluate(student, test, device)
     history.append({"phase": "student", "epoch": 1, "loss": total / max(1, len(labeled)), **vals})
 
