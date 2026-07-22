@@ -1,29 +1,29 @@
 # SemiTNet — سگمنتیشن و شناسایی دندان
 
-> فقط Python 3.10 و `.venv` استفاده می‌شود؛ Conda/Anaconda لازم نیست.
+> قابل اجرا روی Windows و Linux با Python 3.10 و `.venv`. نیازی به Conda/Anaconda یا Make نیست.
 
 ## ۱. نصب پیش‌نیازها
 
 ```bash
-make install
+python project.py install
 ```
 
 ## ۲. دانلود دیتاست و مدل
 
 ```bash
-make download
+python project.py download
 ```
 
 ## ۳. اجرای Smoke Test
 
 ```bash
-make smoke
+python project.py smoke
 ```
 
 ## ۴. اجرای کامل
 
 ```bash
-make full
+python project.py full
 ```
 
-> اجرای کامل به Linux و کارت گرافیک NVIDIA/CUDA نیاز دارد.
+> اجرای کامل به کارت گرافیک NVIDIA و CUDA Toolkit 11.7 نیاز دارد. در Windows نیز Visual Studio C++ Build Tools لازم است.
