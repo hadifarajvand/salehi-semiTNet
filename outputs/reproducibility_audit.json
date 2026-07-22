@@ -13,28 +13,32 @@
   },
   "G1_official_checkpoint": {
     "status": "BLOCKED",
-    "reason": "No official-checkpoint evaluation on the exact 191-image paper test set is present.",
-    "known_checkpoint_provenance": {
-      "revision": "2d79fa571467b159fbcf279d8676bd07fd0dcc9a",
-      "filename": "SemiTNet_Tooth_Instance_Segmentation_32Classes.pth",
-      "size_bytes": 338584301,
-      "sha256": "8364853c7632a491fd66108e23a536fa68e9a9c9b416b21c69143a4d02a26c0a"
-    }
+    "reason": "Official-checkpoint evaluation outputs are absent.",
+    "required_outputs": [
+      "outputs/paper_reproduction/pretrained/metrics.json",
+      "outputs/paper_reproduction/pretrained/run_manifest.json"
+    ]
   },
   "G2_method_faithfulness": {
-    "status": "FAIL_FOR_CURRENT_REDUCED_RUN",
-    "reasons": [
-      "Current dataset is not TSI15k.",
-      "Current split is 60/20/16 instead of the paper 1398/14728/191 protocol.",
-      "Current input is 128x256 grayscale instead of publication-compatible 1024 RGB processing.",
-      "Current QuickSemiTransformer is a lightweight surrogate rather than the publication architecture.",
-      "Current teacher/student schedule and pseudo-label weighting differ materially from the publication protocol.",
-      "Current evaluator is not established as the publication evaluator."
+    "status": "BLOCKED",
+    "reason": "A frozen paper_method_manifest.json has not been produced and verified.",
+    "current_reduced_run_is_paper_faithful": false,
+    "current_reduced_run_failures": [
+      "different dataset",
+      "60/20/16 reduced split instead of 1398/14728/191",
+      "128x256 grayscale instead of publication-compatible 1024 RGB processing",
+      "QuickSemiTransformer surrogate instead of publication-compatible architecture",
+      "different semi-supervised schedule/weights",
+      "publication evaluator not established"
     ]
   },
   "G3_training_reproduction": {
     "status": "BLOCKED",
-    "reason": "G1 has not passed and no full paper-faithful training run is present."
+    "reason": "No full paper-faithful training outputs are present.",
+    "dependencies": {
+      "G1": "BLOCKED",
+      "G2": "BLOCKED"
+    }
   },
   "paper_metrics": {
     "iou": 94.41,
@@ -57,6 +61,5 @@
     "recall": -85.07104323681227,
     "f1": -83.62725310667997
   },
-  "defensible_statement": "Measured reduced-scale re-simulation; not numerically equivalent to the published full-scale experiment.",
-  "highest_priority_next_test": "Run the exact released author checkpoint on the exact 191-image paper test set with a publication-compatible evaluator. Do not begin expensive retraining until this passes."
+  "defensible_statement": "Measured reduced-scale re-simulation; not numerically equivalent to the published full-scale experiment."
 }
