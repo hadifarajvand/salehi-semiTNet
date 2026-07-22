@@ -18,7 +18,7 @@ export PATH="$ROOT/.venv/bin:$PATH"
 "$PY" scripts/bootstrap_upstream.py
 
 SETUP_MARKER="vendor/SemiT-SAM/.full_setup_done"
-if [[ ! -f "$SETUP_MARKER" ]]; then
+if [[ ! -f "$SETUP_MARKER" ]] || ! "$PY" -c 'import detectron2' >/dev/null 2>&1; then
   bash scripts/setup_full_env.sh
   touch "$SETUP_MARKER"
 fi
