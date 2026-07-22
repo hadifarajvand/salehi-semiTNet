@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 VENV = ROOT / ".venv"
 VENV_PY = VENV / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+PREPARED_MANIFEST = ROOT / "data/processed/quick_teeth/split_manifest.json"
 
 
 def run(cmd, *, cwd=ROOT, env=None, check=True):
@@ -79,9 +80,12 @@ def relaunch_in_venv(command: str):
 
 
 def download():
-    # Fast public replacement: 598 panoramic X-rays, 32 positional tooth classes,
-    # pixel-level masks, ~464 MB in Dataset Ninja/Supervisely format.
+    # Exact named public dataset used for the reduced simulation execution.
+    # The downloader verifies 598 images and tooth classes 1..32 before setup.
     run([sys.executable, ROOT / "scripts/download_quick_dataset.py"])
+    run([sys.executable, ROOT / "scripts/prepare_quick_dataset.py"])
+    print("[ok] dataset downloaded, verified, split, and ready for simulation")
+    print("[manifest]", PREPARED_MANIFEST)
 
 
 def smoke():
@@ -89,18 +93,12 @@ def smoke():
     run([sys.executable, ROOT / "scripts/acceptance_check.py", "--mode", "smoke"])
 
 
-def quick_dataset_ready() -> bool:
-    root = ROOT / "data/raw/quick_teeth"
-    exts = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
-    return root.exists() and any(p.is_file() and p.suffix.lower() in exts for p in root.rglob("*"))
-
-
 def full():
-    if not quick_dataset_ready():
-        print("[info] Real replacement dataset is missing; downloading it now.")
+    if not PREPARED_MANIFEST.exists():
+        print("[info] Prepared dataset is missing; running download/setup first.")
         download()
     run([sys.executable, ROOT / "scripts/run_quick_real_experiment.py"])
-    print("[ok] real measured deliverable is ready under outputs/final")
+    print("[ok] measured simulation outputs are ready under outputs/final")
 
 
 def main():
