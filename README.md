@@ -1,9 +1,10 @@
 # SemiTNet — سگمنتیشن و شناسایی دندان
 
-این مخزن اکنون دو مسیر کاملاً جدا دارد تا خروجی‌ها از نظر علمی قابل دفاع باشند:
+این مخزن اکنون سه مسیر جدا دارد تا خروجی‌ها از نظر علمی قابل دفاع باشند:
 
 1. **Reduced measured simulation** — اجرای سبک و قابل تکرار برای بررسی end-to-end پایپ‌لاین، provenance، شکل‌ها و بسته تحویل.
-2. **Paper-equivalence reproduction** — مسیر سخت‌گیرانه برای نزدیک‌شدن به نتایج مقاله که تا زمان عبور از gateهای شواهد، اجازه ادعای «بازتولید نتایج مقاله» نمی‌دهد.
+2. **Strict paper-equivalence reproduction** — مسیر سخت‌گیرانه برای exact TSI15k/test identities؛ تا زمان عبور از gateهای شواهد اجازه ادعای «بازتولید نتایج مقاله» نمی‌دهد.
+3. **TED3 defensible reimplementation** — اجرای بزرگ‌مقیاس با دیتاست رسمی/عمومی TED3 برای checkpoint evaluation، supervised و semi-supervised experiments، بدون ادعای اینکه TED3 دقیقاً همان split اصلی TSI15k است مگر اینکه identity-equivalence اثبات شود.
 
 > وضعیت فعلی: reduced baseline معتبر است، اما هنوز paper-equivalent نیست.
 
@@ -95,7 +96,7 @@ python project.py paper-assets-checkpoint
 python project.py paper-assets-dataset
 ```
 
-قانون مهم: اگر exact TSI15k/TISI15k archive یا test identities قابل بازیابی نباشد، فرایند باید **BLOCKED** گزارش شود. جایگزین‌کردن دیتاست 598 تصویری یا هر دیتاست دیگری برای paper-equivalence ممنوع است.
+قانون مهم: اگر exact TSI15k/TISI15k archive یا test identities قابل بازیابی نباشد، strict paper-equivalence باید **BLOCKED** گزارش شود. TED3 می‌تواند برای reimplementation بزرگ‌مقیاس استفاده شود، اما نباید بدون اثبات identity-equivalence به‌عنوان exact TSI15k معرفی شود.
 
 جزئیات کامل:
 
@@ -104,7 +105,61 @@ reproduction/DEFENSIBLE_REPRODUCTION.md
 reproduction/reference_contract.json
 ```
 
-## ۷. Paper-style figures
+## ۷. اجرای autonomous TED3 campaign پس از قرار دادن دیتاست‌ها
+
+سه فایل زیر را در `reproduction/assets/dataset/incoming/` قرار دهید؛ agent همچنین می‌تواند آن‌ها را در سایر مسیرهای داخل working tree پیدا کند:
+
+```text
+TED3-train.tar
+TED3-test.tar
+TED3-unlabeled-data-15k-pseudo-mask.tar
+```
+
+این فایل‌ها و تمام داده‌های extractشده توسط `.gitignore` محافظت می‌شوند و نباید commit/push/package شوند.
+
+اولین دستور اجباری:
+
+```bash
+python project.py ted3-preflight
+```
+
+این preflight:
+
+- هر سه archive را پیدا می‌کند؛
+- بررسی می‌کند Git آن‌ها را ignore کرده و tracked نیستند؛
+- SHA256 و size را ثبت می‌کند؛
+- tar را قبل از extraction از نظر unsafe path/link بررسی می‌کند؛
+- manifest را در `outputs/ted3_reproduction/preflight/input_archives.json` می‌نویسد.
+
+برای اجرای agent، دستور authoritative در root repository فایل زیر است:
+
+```text
+AGENTS.md
+```
+
+Agent باید طبق آن فایل تا پایان این مراحل ادامه دهد:
+
+1. dataset forensic audit؛
+2. publication-compatible method freeze؛
+3. official checkpoint evaluation؛
+4. supervised experiment؛
+5. semi-supervised teacher/student experiment با unlabeled TED3؛
+6. comparison/statistical analysis؛
+7. تولید تمام figure/table/experiment artifacts موردنیاز بخش Evaluation/Experiments؛
+8. ساخت `EVALUATION_COVERAGE_MATRIX.csv` تا هیچ artifact مقاله بدون وضعیت باقی نماند؛
+9. ساخت final delivery، Persian runbook، reproducibility report و artifact manifest.
+
+Agent نباید با اولین خطا متوقف شود. خطاهای قابل تعمیر باید root-cause شوند، patch شوند، مرحله مربوطه rerun شود و سپس pipeline ادامه پیدا کند. خروجی‌های measured فقط باید از اجرای واقعی تولید شوند؛ copy/fabrication نتایج مقاله ممنوع است.
+
+خروجی اصلی campaign:
+
+```text
+outputs/ted3_reproduction/
+```
+
+Agent فقط زمانی اجازه status نهایی `COMPLETE — DEFENSIBLE TED3 REIMPLEMENTATION` دارد که completion checklist داخل `AGENTS.md` پاس شده باشد.
+
+## ۸. Paper-style figures
 
 ```bash
 python scripts/export_paper_style_figures.py
@@ -130,4 +185,4 @@ Published SemiTNet reference metrics:
 - Recall: `97.10`
 - F1: `95.90`
 
-این فاصله نباید با tuning روی `QuickSemiTransformer` پنهان شود. قدم بعدی علمی، **G1: official-checkpoint equivalence** است، نه افزایش epoch روی reduced surrogate.
+این فاصله نباید با tuning روی `QuickSemiTransformer` پنهان شود. مسیر علمی جدید، اجرای TED3 campaign طبق `AGENTS.md` است و strict paper-equivalence همچنان به exact TSI15k identity evidence وابسته می‌ماند.
