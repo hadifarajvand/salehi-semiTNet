@@ -1,4 +1,4 @@
-name: cross-platform-smoke
+name: cross-platform-delivery
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  smoke:
+  validate:
     strategy:
       fail-fast: false
       matrix:
@@ -25,15 +25,24 @@ jobs:
       - name: Run smoke simulation
         run: python project.py smoke
 
+      - name: Build final delivery bundle
+        run: python project.py full
+
       - name: Verify outputs
         shell: python
         run: |
           from pathlib import Path
           required = [
               Path('outputs/smoke/metrics.json'),
-              Path('outputs/smoke/history.csv'),
-              Path('outputs/smoke/figures/architecture.png'),
               Path('outputs/smoke/figures/predictions.png'),
+              Path('outputs/final/metrics.json'),
+              Path('outputs/final/RESULTS.md'),
+              Path('outputs/final/table2_overall.csv'),
+              Path('outputs/final/table3_groups.csv'),
+              Path('outputs/final/figures/overall_metrics.png'),
+              Path('outputs/final/figures/group_metrics.png'),
+              Path('outputs/final/figures/model_comparison_dice.png'),
+              Path('outputs/final/figures/training_schedule.png'),
           ]
           missing = [str(p) for p in required if not p.exists()]
           if missing:
@@ -41,7 +50,10 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: semitnet-smoke-${{ matrix.os }}
-          path: outputs/smoke
+          name: semitnet-delivery-${{ matrix.os }}
+          path: |
+            outputs/smoke
+            outputs/reference
+            outputs/final
           if-no-files-found: error
           retention-days: 30
