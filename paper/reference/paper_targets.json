@@ -1,0 +1,45 @@
+{
+  "paper": "A Semi-Supervised Transformer-Based Deep Learning Framework for Automated Tooth Segmentation and Identification on Panoramic Radiographs",
+  "doi": "10.3390/diagnostics14171948",
+  "overall": {
+    "iou": 94.41,
+    "dice": 95.45,
+    "precision": 94.74,
+    "recall": 97.1,
+    "f1": 95.9,
+    "params_m": 21.6
+  },
+  "fully_dentate": {
+    "iou": 99.76,
+    "dice": 99.78,
+    "precision": 99.69,
+    "recall": 99.72,
+    "f1": 99.7
+  },
+  "partially_edentulous": {
+    "iou": 93.0,
+    "dice": 94.3,
+    "precision": 93.42,
+    "recall": 96.4,
+    "f1": 94.89
+  },
+  "training": {
+    "iterations": 26250,
+    "batch_size_total": 16,
+    "learning_rate": 0.0001,
+    "lr_steps": [24000,25000],
+    "optimizer": "AdamW",
+    "input_size": 1024,
+    "gpus": "8x NVIDIA V100 32GB",
+    "reported_hours": 6
+  },
+  "dataset": {
+    "total": 16317,
+    "labeled": 1589,
+    "unlabeled": 14728,
+    "labeled_train": 1398,
+    "test": 191,
+    "fully_dentate_test": 40,
+    "partially_edentulous_test": 151
+  }
+}

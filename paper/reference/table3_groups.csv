@@ -1,0 +1,13 @@
+group,model,iou,dice,precision,recall,f1
+fully_dentate,Mask R-CNN,98.84,98.98,99.04,99.36,99.20
+fully_dentate,MPFormer,99.24,99.32,97.64,97.82,97.73
+fully_dentate,Mask2Former,99.47,99.59,99.26,99.57,99.41
+fully_dentate,MaskDINO,99.53,99.64,99.45,99.64,99.55
+fully_dentate,GEM,99.84,99.86,99.65,99.65,99.65
+fully_dentate,SemiTNet,99.76,99.78,99.69,99.72,99.70
+partially_edentulous,Mask R-CNN,89.65,90.70,90.44,92.74,91.57
+partially_edentulous,MPFormer,91.67,93.09,89.23,92.51,90.84
+partially_edentulous,Mask2Former,92.24,93.33,92.28,94.82,93.53
+partially_edentulous,MaskDINO,92.74,94.31,92.18,95.61,93.86
+partially_edentulous,GEM,92.35,93.39,92.46,95.09,93.76
+partially_edentulous,SemiTNet,93.00,94.30,93.42,96.40,94.89
