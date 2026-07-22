@@ -14,18 +14,15 @@ python project.py install
 python project.py download
 ```
 
-This command downloads the exact Dataset Ninja dataset named `Teeth Segmentation on Dental X-ray Images` from the Humans in the Loop source and verifies that it contains 598 images and tooth classes 1 through 32 before it is accepted.
+This command downloads the Dataset Ninja dataset named `Teeth Segmentation on Dental X-ray Images` from the Humans in the Loop source and refuses to continue unless it verifies exactly 598 images and tooth classes 1 through 32.
 
 After download:
-
-- Raw data is kept under `data/raw/quick_teeth/`.
-- Download verification is stored in `data/raw/quick_teeth/download_manifest.json`.
-- The deterministic simulation split is created under `data/processed/quick_teeth/`.
-- Exact split provenance is stored in `data/processed/quick_teeth/split_manifest.json`.
-- Execution split: 60 labeled images, 20 label-hidden pseudo-label images, and 16 held-out test images.
-- Pseudo-label ground-truth annotations are not copied into the simulation input, preventing label leakage.
-
-If the downloaded content is incomplete or is not this exact dataset, `download` fails instead of allowing the simulation to continue.
+- Raw data: `data/raw/quick_teeth/`
+- Download manifest: `data/raw/quick_teeth/download_manifest.json`
+- Prepared data: `data/processed/quick_teeth/`
+- Split manifest: `data/processed/quick_teeth/split_manifest.json`
+- Deterministic split: 60 labeled + 20 label-hidden pseudo-label + 16 held-out test images
+- Pseudo-label ground-truth annotations are not copied into the training input.
 
 ## 3. Smoke test
 
@@ -39,4 +36,12 @@ python project.py smoke
 python project.py full
 ```
 
-`full` consumes only the verified prepared manifest and executes teacher training, pseudo-label generation, student training, EMA teacher updates, and held-out evaluation. If the prepared dataset is missing, `full` automatically runs the download/setup stage first. All measured metrics and figures are written under `outputs/final/`.
+`full` executes teacher training, pseudo-label generation, student training, EMA teacher updates, collapse protection, held-out evaluation, strict output validation, and client packaging.
+
+Low-confidence pseudo-label pixels are ignored rather than converted to background. A health check prevents a collapsed student from replacing a healthier teacher checkpoint. An all-zero final metric set is rejected and cannot be packaged as PASS.
+
+Validated measured outputs are written under `outputs/final/`. After validation, the client package is created as:
+
+```text
+SemiTNet-client-deliverable.zip
+```
