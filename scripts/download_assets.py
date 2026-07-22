@@ -28,7 +28,9 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def _hf_token() -> str | None:
+def _available_token() -> str | None:
+    # Explicit environment tokens take priority. A cached CLI token is only used
+    # as a fallback after anonymous/public access has already failed.
     token = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_HUB_TOKEN")
     if token:
         return token.strip()
@@ -70,7 +72,9 @@ def _download_file(url: str, destination: Path, token: str | None = None, force:
     if existing:
         headers["Range"] = f"bytes={existing}-"
 
-    print("[download] dataset:", url)
+    auth_label = "authenticated" if token else "anonymous"
+    print(f"[download] dataset ({auth_label}):", url)
+
     try:
         with requests.get(url, headers=headers, stream=True, timeout=(30, 300), allow_redirects=True) as response:
             if response.status_code in {401, 403, 404}:
@@ -110,29 +114,36 @@ def dataset(force: bool = False) -> None:
     archive = outdir / DATA_FILE
     outdir.mkdir(parents=True, exist_ok=True)
 
-    # 1) Reuse an archive already placed in the expected directory.
     if archive.exists() and not force:
         print("[ok] dataset archive:", archive)
         return
 
-    # 2) Optional local archive supplied by the user/teacher.
     local_archive = os.getenv("TSI15K_DATASET_ARCHIVE")
     if local_archive:
         _copy_local_archive(Path(local_archive).expanduser(), archive)
         print("[ok] dataset archive copied:", archive)
         return
 
-    # 3) Optional mirror URL. This is useful if the original paper URL moves.
     url = os.getenv("TSI15K_DATASET_URL", DATA_URL).strip()
-    token = _hf_token()
+    first_error: Exception | None = None
 
+    # Public/anonymous first: stale cached Hugging Face credentials must not break
+    # a public download.
     try:
-        _download_file(url, archive, token=token, force=force)
+        _download_file(url, archive, token=None, force=force)
     except RuntimeError as exc:
+        first_error = exc
+        token = _available_token()
+        if token:
+            try:
+                _download_file(url, archive, token=token, force=force)
+            except RuntimeError as auth_exc:
+                first_error = auth_exc
+
+    if not archive.exists():
         original = url == DATA_URL
         details = (
-            "The original TSI15k dataset URL cited by the 2024 paper is currently not publicly reachable "
-            "from Hugging Face (the API returns 401/Repository Not Found)."
+            "The original TSI15k dataset URL cited by the 2024 paper is not currently reachable as a public Hugging Face file."
             if original
             else "The configured TSI15k dataset URL could not be downloaded."
         )
@@ -140,14 +151,13 @@ def dataset(force: bool = False) -> None:
             "\n[dataset unavailable]\n"
             f"{details}\n"
             f"Source attempted: {url}\n"
-            f"Reason: {exc}\n\n"
+            f"Reason: {first_error or 'download failed'}\n\n"
             "Use one of these options and rerun `python project.py download`:\n"
-            "  1. If you have access to the original Hugging Face dataset, log in with `hf auth login` or set HF_TOKEN.\n"
+            "  1. If you were granted access to the original dataset, run `hf auth login` or set HF_TOKEN.\n"
             "  2. Set TSI15K_DATASET_URL to a valid mirror of TISI15k-Dataset.tar.\n"
-            "  3. Put the exact archive locally and set TSI15K_DATASET_ARCHIVE=/path/to/TISI15k-Dataset.tar.\n"
-        ) from exc
+            "  3. Set TSI15K_DATASET_ARCHIVE=/path/to/TISI15k-Dataset.tar for a local copy.\n"
+        )
 
-    # Reject login/error HTML accidentally saved as a tar file.
     import tarfile
 
     if not tarfile.is_tarfile(archive):
@@ -171,14 +181,33 @@ def checkpoint(force: bool = False) -> None:
         print("[ok] checkpoint already verified:", out)
         return
 
-    cached = Path(
-        hf_hub_download(
-            repo_id=MODEL_REPO,
-            filename=MODEL_FILE,
-            force_download=force,
-            token=_hf_token(),
+    # Public model: deliberately try without credentials first so a stale token
+    # cannot turn a public download into a 401.
+    try:
+        cached = Path(
+            hf_hub_download(
+                repo_id=MODEL_REPO,
+                filename=MODEL_FILE,
+                force_download=force,
+                token=False,
+            )
         )
-    )
+    except Exception as public_exc:
+        token = _available_token()
+        if not token:
+            raise SystemExit(f"Checkpoint download failed: {public_exc}") from public_exc
+        try:
+            cached = Path(
+                hf_hub_download(
+                    repo_id=MODEL_REPO,
+                    filename=MODEL_FILE,
+                    force_download=force,
+                    token=token,
+                )
+            )
+        except Exception as auth_exc:
+            raise SystemExit(f"Checkpoint download failed: {auth_exc}") from auth_exc
+
     shutil.copy2(cached, out)
     got = sha256(out)
     if got != MODEL_SHA256:
@@ -198,8 +227,6 @@ def main() -> None:
     if not (args.dataset or args.checkpoint or args.all):
         args.all = True
 
-    # Download the public checkpoint first so a dataset access problem does not
-    # prevent the independently available model file from being obtained.
     if args.checkpoint or args.all:
         checkpoint(args.force)
     if args.dataset or args.all:
