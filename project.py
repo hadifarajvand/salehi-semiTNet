@@ -108,6 +108,10 @@ def audit():
     run([sys.executable, ROOT / "scripts/reproducibility_gate.py"])
 
 
+def ted3_preflight():
+    run([sys.executable, ROOT / "scripts/ted3_input_preflight.py"])
+
+
 def paper_asset(kind: str):
     flag = "--checkpoint" if kind == "checkpoint" else "--dataset"
     run([sys.executable, ROOT / "scripts/download_paper_assets.py", flag])
@@ -123,6 +127,7 @@ def main():
             "smoke",
             "full",
             "audit",
+            "ted3-preflight",
             "paper-assets-checkpoint",
             "paper-assets-dataset",
         ],
@@ -134,6 +139,9 @@ def main():
         return
     if args.command == "audit":
         audit()
+        return
+    if args.command == "ted3-preflight":
+        ted3_preflight()
         return
     if args.command == "paper-assets-checkpoint":
         paper_asset("checkpoint")
