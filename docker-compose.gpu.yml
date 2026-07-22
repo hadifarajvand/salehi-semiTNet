@@ -1,0 +1,18 @@
+services:
+  semitnet:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cuda117
+    volumes:
+      - ./data:/workspace/SemiTNet-Paper-Reproduction/data
+      - ./assets:/workspace/SemiTNet-Paper-Reproduction/assets
+      - ./outputs:/workspace/SemiTNet-Paper-Reproduction/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    stdin_open: true
+    tty: true

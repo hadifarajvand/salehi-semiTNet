@@ -1,0 +1,11 @@
+FROM pytorch/pytorch:1.13.1-cuda11.7-cudnn8-devel
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends git build-essential ninja-build libglib2.0-0 libgl1 && rm -rf /var/lib/apt/lists/*
+WORKDIR /workspace/SemiTNet-Paper-Reproduction
+COPY . .
+RUN pip install --upgrade pip setuptools wheel && pip install -r requirements-tools.txt
+RUN python scripts/bootstrap_upstream.py
+RUN if [ -d vendor/SemiT-SAM/detectron2-main ]; then pip install -e vendor/SemiT-SAM/detectron2-main; else pip install 'git+https://github.com/facebookresearch/detectron2.git'; fi
+RUN pip install -r vendor/SemiT-SAM/requirements.txt && pip install git+https://github.com/cocodataset/panopticapi.git
+RUN cd vendor/SemiT-SAM/mask2former/modeling/pixel_decoder/ops && chmod +x make.sh && ./make.sh
+CMD ["bash"]
