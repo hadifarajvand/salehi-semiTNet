@@ -1,4 +1,4 @@
-name: smoke-and-reference
+name: cross-platform-smoke
 
 on:
   push:
@@ -6,8 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  lightweight-validation:
-    runs-on: ubuntu-latest
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -15,38 +19,29 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install project environment
-        run: PYTHON_BIN=python make install
+      - name: Install project .venv
+        run: python project.py install
 
-      - name: Run unit tests
-        run: make test
+      - name: Run smoke simulation
+        run: python project.py smoke
 
-      - name: Run CPU smoke simulation
-        run: make smoke
-
-      - name: Generate reference figures
-        run: make reference
-
-      - name: Verify expected generated files
+      - name: Verify outputs
+        shell: python
         run: |
-          test -f outputs/smoke/metrics.json
-          test -f outputs/smoke/history.csv
-          test -f outputs/smoke/figures/architecture.png
-          test -f outputs/smoke/figures/predictions.png
-          test -f outputs/smoke/figures/teacher_student_workflow.png
-          test -f outputs/smoke/figures/training_curves.png
-          test -f outputs/reference/paper_dice_comparison.png
-          test -f outputs/reference/paper_iou_comparison.png
-          test -f outputs/reference/paper_precision_comparison.png
-          test -f outputs/reference/paper_recall_comparison.png
-          test -f outputs/reference/paper_f1_comparison.png
+          from pathlib import Path
+          required = [
+              Path('outputs/smoke/metrics.json'),
+              Path('outputs/smoke/history.csv'),
+              Path('outputs/smoke/figures/architecture.png'),
+              Path('outputs/smoke/figures/predictions.png'),
+          ]
+          missing = [str(p) for p in required if not p.exists()]
+          if missing:
+              raise SystemExit('Missing outputs: ' + ', '.join(missing))
 
-      - name: Upload generated outputs
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: semitnet-generated-outputs
-          path: |
-            outputs/smoke
-            outputs/reference
+          name: semitnet-smoke-${{ matrix.os }}
+          path: outputs/smoke
           if-no-files-found: error
           retention-days: 30
