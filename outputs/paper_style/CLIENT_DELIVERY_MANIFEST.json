@@ -1,21 +1,23 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "paper_artifact_coverage": {
     "figures": [1, 2, 3, 4, 5],
     "tables": [1, 2, 3]
   },
-  "measured_reduced_sources": {
+  "measured_sources": {
     "metrics": "outputs/final/metrics.json",
     "history": "outputs/final/history.csv",
-    "qualitative": "outputs/final/figures/predictions.png"
+    "qualitative_source": "outputs/final/figures/predictions.png",
+    "qualitative_primary_export": "outputs/paper_style/figures/figure_05b_measured_qualitative_only.png"
   },
   "published_reference_sources": {
     "table1": "paper/reference/table1_dataset.csv",
     "table2": "paper/reference/table2_overall.csv",
     "table3": "paper/reference/table3_groups.csv"
   },
+  "persian_evaluation_notebook": "notebooks/SemiTNet_Evaluation_Outputs_FA.ipynb",
   "fabricated_metrics": false,
   "fabricated_predictions": false,
-  "figure5_baseline_status": "not executed; explicit placeholders",
-  "claim": "paper-aligned visualization/export package; not numerical reproduction"
+  "figure5_delivery_rule": "Use the measured-only qualitative export as the result figure. Do not present unavailable baseline predictions as executed outputs.",
+  "claim": "Paper-aligned evaluation visualization/export package with published reference values and measured execution outputs kept provenance-separated."
 }
