@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "paper_artifact_coverage": {
+    "figures": [1, 2, 3, 4, 5],
+    "tables": [1, 2, 3]
+  },
+  "measured_reduced_sources": {
+    "metrics": "outputs/final/metrics.json",
+    "history": "outputs/final/history.csv",
+    "qualitative": "outputs/final/figures/predictions.png"
+  },
+  "published_reference_sources": {
+    "table1": "paper/reference/table1_dataset.csv",
+    "table2": "paper/reference/table2_overall.csv",
+    "table3": "paper/reference/table3_groups.csv"
+  },
+  "fabricated_metrics": false,
+  "fabricated_predictions": false,
+  "figure5_baseline_status": "not executed; explicit placeholders",
+  "claim": "paper-aligned visualization/export package; not numerical reproduction"
+}
