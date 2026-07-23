@@ -2,11 +2,30 @@
 
 > Full end-to-end SemiTNet pipeline simulation on real panoramic dental data. Runs on Windows and Linux with Python 3.10 and a project-local `.venv`.
 
+> Clone-safe default notebook path ships with bounded dataset already committed at `data/processed/quick_teeth/`.
+> Default notebook run does **not** need the 598-image source dataset.
+
 ## 1. Install
 
 ```bash
 python project.py install
 ```
+
+## 1.1 Open notebook
+
+```bash
+jupyter notebook notebooks/SemiTNet_Reproduction_and_Evaluation.ipynb
+```
+
+Then run `Run All`.
+
+The default notebook execution uses the committed bounded subset:
+
+- 60 labeled training images
+- 20 pseudo/unlabeled images
+- 16 held-out test images
+
+Measured outputs go to `outputs/final/` and paper-style figures/tables go to `outputs/paper_style/`.
 
 ## 2. Download and prepare dataset
 
@@ -15,6 +34,8 @@ python project.py download
 ```
 
 This command downloads the Dataset Ninja dataset named `Teeth Segmentation on Dental X-ray Images` from the Humans in the Loop source and refuses to continue unless it verifies exactly 598 images and tooth classes 1 through 32.
+
+For the default notebook demonstration, you do **not** need this download step because the bounded subset is already included in `data/processed/quick_teeth/`.
 
 After download:
 - Raw data: `data/raw/quick_teeth/`

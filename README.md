@@ -8,11 +8,29 @@
 
 > وضعیت فعلی: reduced baseline معتبر است، اما هنوز paper-equivalent نیست.
 
+> مسیر پیش‌فرض notebook به‌صورت clone-safe با دیتاست bounded از پیش commit شده در `data/processed/quick_teeth/` اجرا می‌شود و برای Run All نیاز به دانلود دیتاست 598-image ندارد.
+
 ## ۱. نصب محیط reduced simulation
 
 ```bash
 python project.py install
 ```
+
+## ۱.۱ اجرای notebook
+
+```bash
+jupyter notebook notebooks/SemiTNet_Reproduction_and_Evaluation.ipynb
+```
+
+سپس `Run All` را اجرا کنید.
+
+اجرای پیش‌فرض notebook از subset بسته‌شده‌ی زیر استفاده می‌کند:
+
+- 60 تصویر labeled برای train
+- 20 تصویر pseudo/unlabeled
+- 16 تصویر held-out test
+
+خروجی‌های measured در `outputs/final/` و خروجی‌های paper-style در `outputs/paper_style/` نوشته می‌شوند.
 
 ## ۲. دانلود دیتاست reduced simulation
 
@@ -21,6 +39,8 @@ python project.py download
 ```
 
 این دستور دیتاست `Teeth Segmentation on Dental X-ray Images` را دریافت می‌کند و فقط در صورتی ادامه می‌دهد که دقیقاً 598 تصویر و کلاس‌های دندان 1 تا 32 تأیید شوند.
+
+برای اجرای پیش‌فرض notebook، این دانلود لازم نیست چون subset bounded از قبل در `data/processed/quick_teeth/` موجود است.
 
 پس از دانلود:
 
