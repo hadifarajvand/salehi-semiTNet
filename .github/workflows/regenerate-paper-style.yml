@@ -1,0 +1,64 @@
+name: Regenerate paper-aligned exports
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/export_client_paper_package.py'
+      - 'scripts/export_paper_style_figures.py'
+      - 'paper/reference/table1_dataset.csv'
+      - '.github/workflows/regenerate-paper-style.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install export dependencies
+        run: pip install -r requirements-smoke.txt
+      - name: Regenerate paper-aligned client package
+        run: python scripts/export_client_paper_package.py
+      - name: Validate required artifacts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          root=Path('.')
+          required=[
+            'outputs/paper_style/figures/figure_01_semitnet_architecture.png',
+            'outputs/paper_style/figures/figure_02_teacher_student_workflow.png',
+            'outputs/paper_style/figures/figure_03_training_loss_precision.png',
+            'outputs/paper_style/figures/figure_04_performance_radar.png',
+            'outputs/paper_style/figures/figure_05_qualitative_outputs.png',
+            'outputs/paper_style/tables/table_01_tsi15k_distribution.png',
+            'outputs/paper_style/tables/table_02_overall_performance.png',
+            'outputs/paper_style/tables/table_03_group_performance.png',
+            'outputs/paper_style/EVALUATION_COVERAGE_MATRIX.csv',
+            'outputs/paper_style/VISUAL_FIDELITY_AUDIT.md',
+            'outputs/paper_style/CLIENT_DELIVERY_MANIFEST.json',
+            'outputs/SemiTNet-paper-aligned-export.zip',
+          ]
+          missing=[p for p in required if not (root/p).is_file() or (root/p).stat().st_size==0]
+          if missing: raise SystemExit(f'Missing exports: {missing}')
+          for p in required:
+              if p.endswith('.png'):
+                  im=Image.open(root/p)
+                  if im.width < 800 or im.height < 300:
+                      raise SystemExit(f'Low-resolution artifact {p}: {im.size}')
+          print('PASS: all client-facing paper-aligned artifacts exist and are non-empty.')
+          PY
+      - name: Commit regenerated exports
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add outputs/paper_style
+          git add -f outputs/SemiTNet-paper-aligned-export.zip
+          git diff --cached --quiet && exit 0
+          git commit -m 'Regenerate paper-aligned figure and table exports'
+          git push
