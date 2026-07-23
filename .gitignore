@@ -9,6 +9,12 @@ data/processed/
 data/TED3/
 data/ted3/
 data/incoming/
+
+# Already-extracted TED3 research datasets — authoritative local inputs, never commit.
+data/train/
+data/test/
+data/TED3-unlabeled-data-15k-pseudo-mask/
+
 assets/checkpoints/
 reproduction/assets/checkpoints/
 reproduction/assets/dataset/
@@ -19,7 +25,7 @@ outputs/inference/
 *.tar.gz
 *.zip
 
-# Large TED3 research inputs — never commit or package these archives.
+# Large TED3 archive inputs — retain locally for provenance only, never commit/package.
 TED3-train.tar
 TED3-test.tar
 TED3-unlabeled-data-15k-pseudo-mask.tar
