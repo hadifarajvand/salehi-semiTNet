@@ -14,7 +14,17 @@ EXPECTED = (
     "TED3-test.tar",
     "TED3-unlabeled-data-15k-pseudo-mask.tar",
 )
-PREFERRED = ROOT / "reproduction/assets/dataset/incoming"
+
+# The user-facing contract is that downloaded archives are placed under data/.
+# Search these locations in order before falling back to a whole-repo scan.
+PREFERRED_DIRS = (
+    ROOT / "data",
+    ROOT / "data/TED3",
+    ROOT / "data/ted3",
+    ROOT / "data/incoming",
+    ROOT / "reproduction/assets/dataset/incoming",
+)
+PROCESSED_ROOT = ROOT / "data/processed/ted3"
 
 
 def run_git(*args: str) -> subprocess.CompletedProcess[str]:
@@ -28,9 +38,23 @@ def run_git(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 def discover(name: str) -> Path:
-    preferred = PREFERRED / name
-    if preferred.is_file():
-        return preferred
+    for directory in PREFERRED_DIRS:
+        candidate = directory / name
+        if candidate.is_file():
+            return candidate
+
+    # Also search recursively under data/ before searching the rest of the repo.
+    data_root = ROOT / "data"
+    if data_root.exists():
+        data_matches = [p for p in data_root.rglob(name) if p.is_file()]
+        if len(data_matches) == 1:
+            return data_matches[0]
+        if len(data_matches) > 1:
+            shown = "\n  - ".join(str(p.relative_to(ROOT)) for p in data_matches)
+            raise SystemExit(
+                f"[preflight failed] multiple copies of {name} found under data/:\n  - {shown}\n"
+                "Keep one authoritative copy under data/ and remove or rename duplicates."
+            )
 
     matches = []
     for path in ROOT.rglob(name):
@@ -39,9 +63,10 @@ def discover(name: str) -> Path:
         if path.is_file():
             matches.append(path)
     if not matches:
+        preferred_text = ", ".join(str(p.relative_to(ROOT)) for p in PREFERRED_DIRS[:4])
         raise SystemExit(
             f"[preflight failed] missing required archive: {name}. "
-            f"Place it under {PREFERRED.relative_to(ROOT)}/ or anywhere inside the repository working tree."
+            f"Place it under the repository data folder, preferably one of: {preferred_text}."
         )
     if len(matches) > 1:
         shown = "\n  - ".join(str(p.relative_to(ROOT)) for p in matches)
@@ -90,7 +115,6 @@ def inspect_tar(path: Path) -> dict:
                     unsafe.append(member.name)
                 if member.issym() or member.islnk():
                     symlinks += 1
-                    # Links are treated as unsafe for extraction unless manually audited.
                     unsafe.append(member.name)
                 if member.isfile():
                     files += 1
@@ -153,13 +177,16 @@ def main() -> None:
         "status": "PASS",
         "git_head": head.stdout.strip() if head.returncode == 0 else None,
         "git_status_short": status.stdout.splitlines(),
+        "authoritative_input_policy": "Use the three discovered TED3 archives from data/; do not use the legacy 598-image quick dataset for this campaign.",
+        "processed_dataset_root": str(PROCESSED_ROOT.relative_to(ROOT)),
         "archives": records,
-        "next_stage": "dataset forensic audit and safe extraction",
+        "next_stage": "safe extraction into data/processed/ted3 followed by dataset forensic audit",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(manifest, indent=2) + "\n")
     print(json.dumps(manifest, indent=2))
     print(f"[ok] TED3 input preflight PASS: {OUT.relative_to(ROOT)}")
+    print(f"[next] Extract/process only these verified archives into {PROCESSED_ROOT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
