@@ -6,6 +6,9 @@ __pycache__/
 vendor/SemiT-SAM/
 data/raw/
 data/processed/
+data/TED3/
+data/ted3/
+data/incoming/
 assets/checkpoints/
 reproduction/assets/checkpoints/
 reproduction/assets/dataset/
