@@ -5,7 +5,14 @@ __pycache__/
 .env
 vendor/SemiT-SAM/
 data/raw/
-data/processed/
+
+# Keep processed research data ignored by default, but allow the exact bounded
+# quick_teeth subset used by the executable notebook to be versioned so a fresh
+# clone can run the notebook without downloading the full source dataset.
+data/processed/*
+!data/processed/quick_teeth/
+!data/processed/quick_teeth/**
+
 data/TED3/
 data/ted3/
 data/incoming/
