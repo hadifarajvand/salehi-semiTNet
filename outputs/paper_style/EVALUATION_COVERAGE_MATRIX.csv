@@ -2,8 +2,7 @@ artifact,paper_role,export,data_kind,status
 Figure 1,Architecture,figures/figure_01_semitnet_architecture.png,paper-reference structure,PASS
 Figure 2,Teacher–student distillation workflow,figures/figure_02_teacher_student_workflow.png,paper-reference workflow mapped to executable implementation,PASS
 Figure 3,Training loss + precision dual-axis plot,figures/figure_03_training_loss_precision.png,measured execution,PASS
-Figure 4,Three radar charts; IoU/Dice/Precision/Recall/F1,figures/figure_04_performance_radar.png,published-reference metrics,PASS
-Figure 4b,Measured execution radar; IoU/Dice/Precision/Recall/F1,figures/figure_04b_measured_reduced_simulation.png,measured execution,PASS
+Figure 4,Three radar charts; IoU/Dice/Precision/Recall/F1,figures/figure_04_performance_radar.png,published-reference metrics plus measured radar generated in Persian notebook,PASS
 Figure 5,Qualitative prediction output,figures/figure_05b_measured_qualitative_only.png,measured qualitative output,PASS
 Table 1,TSI15k train/test distribution,tables/table_01_tsi15k_distribution.png,published-reference,PASS
 Table 2,Overall performance comparison,tables/table_02_overall_performance.png,published-reference,PASS
