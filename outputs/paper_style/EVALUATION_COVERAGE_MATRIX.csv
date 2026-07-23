@@ -1,0 +1,9 @@
+artifact,paper_role,export,data_kind,status
+Figure 1,Architecture,figures/figure_01_semitnet_architecture.png,paper-reference structure,PASS
+Figure 2,Teacher–student distillation workflow,figures/figure_02_teacher_student_workflow.png,paper-reference structure mapped to reduced workflow,PASS
+Figure 3,Training loss + precision dual-axis plot,figures/figure_03_training_loss_precision.png,measured reduced run,PASS
+Figure 4,Three radar charts; IoU/Dice/Precision/Recall/F1,figures/figure_04_performance_radar.png,published-reference metrics,PASS
+Figure 5,Two-row × seven-panel qualitative layout,figures/figure_05_qualitative_outputs.png,explicit availability placeholders; measured source retained in repo,PARTIAL
+Table 1,TSI15k train/test distribution,tables/table_01_tsi15k_distribution.png,published-reference,PASS
+Table 2,Overall performance comparison,tables/table_02_overall_performance.png,published-reference,PASS
+Table 3,Fully dentate vs partially edentulous metrics,tables/table_03_group_performance.png,published-reference,PASS
