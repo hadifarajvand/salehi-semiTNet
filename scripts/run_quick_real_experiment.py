@@ -9,9 +9,8 @@ import time
 import zlib
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -326,29 +325,107 @@ def main():
         "unsupervised_weight": UNSUP_WEIGHT,
     }, indent=2))
 
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-    ax.plot(range(1, len(history) + 1), [r["loss"] for r in history], marker="o")
-    ax.set_xlabel("Stage epoch"); ax.set_ylabel("Loss"); ax.set_title("Teacher/student simulation training")
-    fig.tight_layout(); fig.savefig(FIG / "training_curves.png", dpi=180); plt.close(fig)
+    def _font(size=16):
+        for name in ["DejaVuSans.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]:
+            try:
+                return ImageFont.truetype(name, size=size)
+            except Exception:
+                continue
+        return ImageFont.load_default()
 
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-    names = ["IoU", "Dice", "Precision", "Recall", "F1"]
-    values = [final[k.lower()] for k in names]
-    bars = ax.bar(names, values); ax.set_ylim(0, 100); ax.set_ylabel("Percent"); ax.set_title(f"Measured simulation metrics ({selected_name})")
-    for bar, value in zip(bars, values):
-        ax.text(bar.get_x() + bar.get_width() / 2, value + 1, f"{value:.1f}", ha="center", fontsize=8)
-    fig.tight_layout(); fig.savefig(FIG / "metrics.png", dpi=180); plt.close(fig)
+    def _line_chart(path, xs, ys, title, xlab, ylab):
+        w, h = 1200, 700
+        img = Image.new("RGB", (w, h), "white")
+        d = ImageDraw.Draw(img)
+        f_title, f_axis, f_tick = _font(28), _font(20), _font(18)
+        left, top, right, bottom = 90, 70, w - 60, h - 90
+        d.text((left, 20), title, fill="black", font=f_title)
+        d.line((left, top, left, bottom), fill="black", width=3)
+        d.line((left, bottom, right, bottom), fill="black", width=3)
+        ymin, ymax = min(ys), max(ys)
+        if ymax == ymin:
+            ymax = ymin + 1.0
+        x_min, x_max = min(xs), max(xs)
+        pts = []
+        for x, y in zip(xs, ys):
+            px = left + (x - x_min) / max(1e-9, (x_max - x_min)) * (right - left)
+            py = bottom - (y - ymin) / (ymax - ymin) * (bottom - top)
+            pts.append((px, py))
+        if len(pts) > 1:
+            d.line(pts, fill=(52, 94, 235), width=4)
+        for px, py in pts:
+            d.ellipse((px - 5, py - 5, px + 5, py + 5), fill=(52, 94, 235))
+        for frac in np.linspace(0, 1, 5):
+            y = bottom - frac * (bottom - top)
+            v = ymin + frac * (ymax - ymin)
+            d.line((left - 6, y, left, y), fill="black", width=2)
+            d.text((10, y - 10), f"{v:.2f}", fill="black", font=f_tick)
+        d.text((w // 2 - 80, h - 55), xlab, fill="black", font=f_axis)
+        img.save(path)
+
+    def _bar_chart(path, labels, values, title):
+        w, h = 1200, 700
+        img = Image.new("RGB", (w, h), "white")
+        d = ImageDraw.Draw(img)
+        f_title, f_axis, f_tick = _font(28), _font(20), _font(18)
+        left, top, right, bottom = 90, 80, w - 50, h - 120
+        d.text((left, 20), title, fill="black", font=f_title)
+        d.line((left, top, left, bottom), fill="black", width=3)
+        d.line((left, bottom, right, bottom), fill="black", width=3)
+        bar_w = (right - left) / max(1, len(labels))
+        for i, (lab, val) in enumerate(zip(labels, values)):
+            x0 = left + i * bar_w + bar_w * 0.15
+            x1 = left + (i + 1) * bar_w - bar_w * 0.15
+            y0 = bottom - (val / 100.0) * (bottom - top)
+            d.rectangle((x0, y0, x1, bottom), fill=(52, 94, 235))
+            d.text((x0, y0 - 25), f"{val:.1f}", fill="black", font=f_tick)
+            d.text((x0, bottom + 8), lab, fill="black", font=f_tick)
+        img.save(path)
+
+    def _radar_chart(path, labels, values, title):
+        import math
+        size = 1200
+        img = Image.new("RGB", (size, size), "white")
+        d = ImageDraw.Draw(img)
+        c = size // 2
+        r = size * 0.36
+        f_title, f_tick = _font(30), _font(18)
+        d.text((60, 30), title, fill="black", font=f_title)
+        angles = [2 * math.pi * i / len(labels) - math.pi / 2 for i in range(len(labels))]
+        for frac in [0.25, 0.5, 0.75, 1.0]:
+            rr = r * frac
+            circle = [(c + rr * math.cos(ang), c + rr * math.sin(ang)) for ang in angles]
+            circle.append(circle[0])
+            d.line(circle, fill=(210, 210, 210), width=2)
+        for ang, lab in zip(angles, labels):
+            x = c + (r + 40) * math.cos(ang)
+            y = c + (r + 40) * math.sin(ang)
+            d.line((c, c, x, y), fill=(160, 160, 160), width=2)
+            d.text((x - 30, y - 10), lab, fill="black", font=f_tick)
+        pts = []
+        for ang, val in zip(angles, values):
+            rr = r * (val / 100.0)
+            pts.append((c + rr * math.cos(ang), c + rr * math.sin(ang)))
+        poly = pts + [pts[0]]
+        d.line(poly, fill=(52, 94, 235), width=4)
+        d.polygon(pts, outline=(52, 94, 235), fill=(52, 94, 235))
+        img.save(path)
+
+    _line_chart(FIG / "training_curves.png", list(range(1, len(history) + 1)), [r["loss"] for r in history], "Teacher/student simulation training", "Stage epoch", "Loss")
+    _bar_chart(FIG / "metrics.png", ["IoU", "Dice", "Precision", "Recall", "F1"], [final[k.lower()] for k in ["IoU", "Dice", "Precision", "Recall", "F1"]], f"Measured simulation metrics ({selected_name})")
 
     x, y = next(iter(test)); selected.eval()
     with torch.no_grad(): pred = selected(x.to(device)).argmax(1).cpu()
-    n = min(3, len(x)); fig, axs = plt.subplots(n, 3, figsize=(11, 3 * n))
-    if n == 1: axs = np.array([axs])
+    n = min(3, len(x))
+    canvas = Image.new("RGB", (W * 3, H * n), "white")
     for i in range(n):
-        axs[i, 0].imshow(x[i, 0], cmap="gray"); axs[i, 0].set_title("Panoramic X-ray")
-        axs[i, 1].imshow(y[i], vmin=0, vmax=32, cmap="nipy_spectral"); axs[i, 1].set_title("Ground truth (32 classes)")
-        axs[i, 2].imshow(pred[i], vmin=0, vmax=32, cmap="nipy_spectral"); axs[i, 2].set_title(f"Prediction ({selected_name})")
-        for axis in axs[i]: axis.axis("off")
-    fig.tight_layout(); fig.savefig(FIG / "predictions.png", dpi=180); plt.close(fig)
+        pano = Image.fromarray((x[i, 0].numpy() * 255).astype(np.uint8)).convert("RGB").resize((W, H))
+        gt = Image.fromarray((y[i].numpy() > 0).astype(np.uint8) * 255).convert("RGB").resize((W, H))
+        pr = Image.fromarray((pred[i].numpy() > 0).astype(np.uint8) * 255).convert("RGB").resize((W, H))
+        canvas.paste(pano, (0, i * H))
+        canvas.paste(gt, (W, i * H))
+        canvas.paste(pr, (W * 2, i * H))
+    canvas.save(FIG / "predictions.png")
 
     report = f"""# SemiTNet Pipeline Simulation Results
 

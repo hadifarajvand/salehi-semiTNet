@@ -16,7 +16,7 @@
     128,
     256
   ],
-  "runtime_seconds": 41.60130190849304,
+  "runtime_seconds": 42.95750188827515,
   "device": "cpu",
   "selected_checkpoint": "student",
   "student_collapse_guard_triggered": false,

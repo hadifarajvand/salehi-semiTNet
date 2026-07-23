@@ -15,4 +15,4 @@ The dataset download was verified before simulation: 598 panoramic images and to
 - Precision: 12.53%
 - Recall: 12.03%
 - F1: 12.27%
-- Runtime: 41.6 seconds
+- Runtime: 43.0 seconds
