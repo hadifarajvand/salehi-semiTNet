@@ -1,24 +1,26 @@
-# Export readme
+# SemiTNet Paper-Aligned Client Export
 
-Generated from measured outputs in `outputs/final/` with 10 history rows.
+This folder mirrors the paper's main visual/evaluation artifact set for fast delivery.
 
-## Output set
-- `outputs/paper_style/figures/figure_01_semitnet_architecture.png`
-- `outputs/paper_style/figures/figure_02_teacher_student_workflow.png`
-- `outputs/paper_style/figures/figure_03_training_loss_precision.png`
-- `outputs/paper_style/figures/figure_04_performance_radar.png`
-- `outputs/paper_style/figures/figure_04b_measured_reduced_simulation.png`
-- `outputs/paper_style/figures/figure_05_qualitative_outputs.png`
-- `outputs/paper_style/figures/figure_05b_measured_qualitative_only.png`
+## Main paper counterparts
+- Figure 1: architecture
+- Figure 2: semi-supervised teacher/student distillation workflow
+- Figure 3: training loss + precision
+- Figure 4: overall / fully dentate / partially edentulous radar charts
+- Figure 5: qualitative 2×7 panel structure
+- Table 1: dataset distribution
+- Table 2: overall performance metrics
+- Table 3: subgroup performance metrics
+
+All generated figures are available as PNG/PDF and tables as PNG/PDF/CSV in the client export bundle produced by `python scripts/export_client_paper_package.py`.
 
 ## Provenance
-- `outputs/final/metrics.json`
-- `outputs/final/history.csv`
-- `outputs/final/run_manifest.json`
-- `outputs/final/figures/predictions.png`
-- `paper/reference/table2_overall.csv`
-- `paper/reference/table3_groups.csv`
-- `paper/reference/paper_targets.json`
+- measured reduced metrics: `outputs/final/metrics.json`
+- measured reduced history: `outputs/final/history.csv`
+- measured qualitative source: `outputs/final/figures/predictions.png`
+- published references: `paper/reference/table1_dataset.csv`, `table2_overall.csv`, `table3_groups.csv`
 
-## Constraint
-No training or inference rerun. No measured metric rewrite.
+## Important limitation
+Figure 5 baseline model outputs were not executed. They are shown as explicit unavailable placeholders rather than fabricated predictions. The measured SemiTNet/ground-truth qualitative source remains available separately in `outputs/final/figures/predictions.png`.
+
+This package matches paper **metrics, artifact categories, panel geometry, and presentation style** without claiming the same numerical experimental results.
