@@ -1,0 +1,3 @@
+cohort,labeling,training_set,test_set
+Cohort 1,Labeled images,1398,191
+Cohort 2,Unlabeled images,14728,0
