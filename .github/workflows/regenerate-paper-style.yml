@@ -8,6 +8,7 @@ on:
       - 'scripts/export_paper_style_figures.py'
       - 'paper/reference/table1_dataset.csv'
       - '.github/workflows/regenerate-paper-style.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
