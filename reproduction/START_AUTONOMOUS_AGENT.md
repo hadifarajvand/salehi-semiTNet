@@ -1,276 +1,168 @@
-# Exact autonomous execution prompt — already-extracted TED3 folders
+# Delivery-first autonomous execution prompt
 
 Copy the prompt below verbatim into the coding/research agent.
 
 ---
 
-You are the autonomous research/reproduction agent for this repository. Work directly inside the current `salehi-semiTNet` repository and execute the entire task end-to-end without asking me to supervise intermediate failures.
+You are the execution agent for `salehi-semiTNet`. Your job is to **finish the TED3 simulation campaign and deliver measured outputs**, not to stop and write blocker reports for fixable environment problems.
 
-First, read `AGENTS.md` completely and treat it as the authoritative scientific and execution contract.
+Read `AGENTS.md`, then execute. Keep commentary minimal. Spend effort on fixing/running, not explaining why something failed.
 
-## CRITICAL INPUT RULE — DATA ARE ALREADY EXTRACTED
+## DATA — ALREADY EXTRACTED, DO NOT EXTRACT AGAIN
 
-The TED3 datasets have **already been extracted** by the user. Do not unzip, untar, re-extract, duplicate, or overwrite them from any archive.
+Use these existing folders directly:
 
-These three directories are the authoritative dataset inputs:
+- `data/train/`
+- `data/test/`
+- `data/TED3-unlabeled-data-15k-pseudo-mask/`
 
-```text
-data/train/
-data/test/
-data/TED3-unlabeled-data-15k-pseudo-mask/
-```
+Do not untar/unzip anything. Do not redownload data. Do not use `quick_teeth`. Do not run the old `python project.py full` as the TED3 result.
 
-Use these directories directly as the source data for this campaign.
+Run the TED3 preflight/audit, repair path handling if needed, build only lightweight manifests/indexes under `data/processed/ted3/`, and continue.
 
-If `.tar`, `.tar.gz`, or `.zip` archives are still present in `data/`, retain them only for provenance/hash verification. **Do not extract them again under any circumstance.**
+## NON-STOP RULE
 
-Do not redownload another substitute dataset.
-Do not use the historical 598-image `quick_teeth` dataset.
-Do not run `python project.py full` as the TED3 reproduction; that command belongs to the old reduced simulation.
+**Do not stop because a Python package, Detectron2, compiler, architecture, or current virtualenv is incompatible. Those are implementation problems you must solve.**
 
-Your first command must be:
+The previous result:
 
-```bash
-python project.py ted3-preflight
-```
+- `detectron2` missing
+- arm64 clang build failure
+- x86_64/arm64 Torch mismatch
 
-The preflight must validate the three already-extracted directories, verify Git safety, inventory their files/extensions/sizes, and optionally record archive hashes if archives still exist. If preflight fails for a locally repairable reason, fix the repository or path handling safely and rerun until it passes.
+is **not an acceptable final status**.
 
-## DO NOT RE-EXTRACT OR DUPLICATE THE DATASET
+Use this escalation order automatically until you have a working inference/training runtime:
 
-After preflight:
+1. Repair or replace the current venv if practical.
+2. Create a fresh isolated environment with versions compatible with the released SemiTNet code.
+3. If native Apple Silicon remains incompatible, use a containerized Linux environment. Prefer a pinned Docker/Colima image; use `--platform linux/amd64` when the released Detectron2 stack requires x86_64. Mount the repository/data instead of copying the dataset.
+4. If needed, build Detectron2 from a publication-compatible commit inside that compatible environment, matching PyTorch/torchvision/compiler architecture.
+5. If Docker is unavailable, use an x86_64/Rosetta Conda/Micromamba/Python environment when available.
+6. If the released code still has narrow compatibility defects, patch those defects while preserving model semantics and record the patch.
 
-- inspect the actual existing folder structures in place;
-- do not run `tar -x`, `tarfile.extractall`, `unzip`, or equivalent archive extraction for TED3;
-- do not delete or overwrite the source directories;
-- do not create another full copy of the multi-GB datasets unless a technically necessary format conversion requires specific derived files.
+Do not create `BLOCKED.md` and stop for dependency/build/architecture issues until all reasonable environment routes above have actually been attempted.
 
-Build deterministic manifests, indexes, converted annotations, metadata, split definitions, and other derived artifacts under:
+## REQUIRED EXECUTION
 
-```text
-data/processed/ted3/
-```
+Complete these in order:
 
-The final loaders may read the original extracted files directly through these manifests/indexes. Prefer this over copying all images again.
+### 1. Official checkpoint evaluation
 
-## REQUIRED DATA PROCESSING AND AUDIT
+Run the released SemiTNet checkpoint on real `data/test/` through the compatible publication-style pipeline.
 
-Inspect the real contents before assuming any annotation or loader format.
-
-Process these roles correctly:
-
-1. `data/train/`
-   - labeled training source;
-   - identify images, annotations, classes, and tooth-ID mapping;
-   - derive validation only from this training source.
-
-2. `data/test/`
-   - held-out final evaluation source;
-   - never use for training, pseudo-label generation, hyperparameter tuning, or checkpoint selection.
-
-3. `data/TED3-unlabeled-data-15k-pseudo-mask/`
-   - semi-supervised unlabeled/pseudo-mask source;
-   - identify raw unlabeled images and pseudo masks from the actual folder structure;
-   - never treat pseudo masks as human ground-truth test labels.
-
-Run a forensic audit before expensive simulation:
-
-- exact image and annotation counts;
-- corrupt/missing files;
-- class/category and tooth-ID mapping;
-- dimensions and image formats;
-- exact duplicate leakage across train/test/unlabeled;
-- near-duplicate checks where practical;
-- identity manifests and hashes;
-- train/test contamination checks;
-- provenance of human labels vs pseudo labels vs unlabeled images;
-- comparison of TED3 test composition with the paper-reported protocol, without claiming exact TSI15k equivalence unless actually proven.
-
-Write the audit under:
-
-```text
-outputs/ted3_reproduction/dataset_audit/
-```
-
-Do not continue to expensive training until the dataset is demonstrably loadable, mappings are coherent, leakage/corruption issues are resolved or explicitly documented, and a real-data loader/inference smoke test passes.
-
-## IMPLEMENTATION AND SIMULATION
-
-Use the authors' released SemiTNet/SemiT-SAM implementation and released checkpoint as the primary executable evidence. Resolve paper-vs-code discrepancies explicitly rather than blindly using newer defaults.
-
-The campaign must execute in this order:
-
-### A. Official checkpoint evaluation
-
-- Acquire/verify the pinned official checkpoint if needed.
-- Run the actual checkpoint against the TED3 test data originating from `data/test/` using publication-compatible preprocessing, class mapping, post-processing, and evaluator.
-- Produce aggregate metrics, per-image metrics, predictions, logs, and comparison against published reference metrics.
-- If results are unexpectedly poor, diagnose loader/class mapping/preprocessing/evaluator/checkpoint compatibility first, fix technical mismatches, and rerun before training.
-
-### B. Publication-compatible supervised experiment
-
-- Train the closest defensible publication-compatible architecture using labeled TED3 data originating from `data/train/`.
-- Use a fixed validation protocol derived only from training data.
-- Keep `data/test/` untouched until final evaluation.
-- Save configs, histories, checkpoints/hashes, validation evidence, metrics, per-image metrics, predictions, runtime/resource information, and exact commands.
-
-### C. Semi-supervised TED3 experiment
-
-Use:
-
-```text
-data/TED3-unlabeled-data-15k-pseudo-mask/
-```
-
-for the semi-supervised teacher/student workflow.
-
-Run the closest defensible publication-compatible pipeline supported by the paper and released code:
-
-- teacher/labeled pretraining;
-- unlabeled/pseudo-label processing;
-- burn-in;
-- pseudo-label filtering;
-- student training;
-- teacher EMA updates/distillation;
-- publication-compatible architecture/losses/optimizer/LR schedule/query-decoder behavior to the closest defensible extent;
-- final evaluation using the same held-out TED3 test protocol.
-
-Smoke runs are debugging only. Do not silently reduce the final experiment to `QuickSemiTransformer`, the 60/20/16 quick split, 128x256 inputs, a toy subset, or a short fake-equivalent run and present it as the final result.
-
-If hardware constraints require adaptation, use scientifically defensible changes such as gradient accumulation where possible, preserve effective protocol intent, and document every deviation.
-
-## FAILURE REPAIR LOOP
-
-For every recoverable error:
-
-1. capture the failing command and logs;
-2. identify the root cause;
-3. patch the smallest defensible fix;
-4. add/adjust a regression or smoke check where appropriate;
-5. rerun the failed stage;
-6. verify the fix;
-7. continue the pipeline.
-
-Do not stop at the first error, setup completion, smoke test, checkpoint evaluation, or one successful experiment.
-
-Do not repeatedly retry unchanged commands.
-Do not weaken scientific checks to force PASS.
-Do not fabricate metrics, predictions, figures, tables, curves, baselines, or confidence intervals.
-Do not copy paper numbers into measured-output files.
-
-## OUTPUT REQUIREMENTS
-
-All new measured experiment outputs must be stored under:
-
-```text
-outputs/ted3_reproduction/
-```
-
-Generate and preserve:
+Produce real:
 
 - aggregate metrics;
 - per-image metrics;
-- training/validation histories;
 - predictions;
-- checkpoint hashes;
-- configs;
-- exact commands;
-- runtime/resource information;
-- experiment manifests;
-- checkpoint-vs-trained-model comparison;
-- supervised-vs-semi-supervised comparison;
-- statistical analysis supported by actual executions.
+- qualitative figures;
+- evaluator logs;
+- run manifest with dataset paths and checkpoint hash.
 
-Every final run manifest must prove the real dataset roots used. It must explicitly show that TED3 data originated from:
+If metrics look wrong, debug preprocessing/class mapping/checkpoint loading/evaluator and rerun. Do not move on with a knowingly broken evaluator.
 
-```text
-data/train/
-data/test/
-data/TED3-unlabeled-data-15k-pseudo-mask/
-```
+### 2. Supervised TED3 experiment
 
-or deterministic derived manifests/indexes under:
+Train/evaluate the closest defensible publication-compatible model using `data/train/`, with validation derived only from training data and final evaluation on `data/test/`.
 
-```text
-data/processed/ted3/
-```
+### 3. Semi-supervised TED3 experiment
 
-It must also prove that `data/processed/quick_teeth/` was not used for final TED3 experiments.
+Use:
 
-## RESEARCH ARTICLE EVALUATION/EXPERIMENT OUTPUTS
+- labeled: `data/train/`
+- unlabeled/pseudo source: `data/TED3-unlabeled-data-15k-pseudo-mask/`
+- final test: `data/test/`
 
-Inspect the research article/reference material present in the repository.
+Run the teacher/student workflow: teacher pretraining, unlabeled/pseudo-label processing, burn-in, student training, EMA/distillation, final evaluation.
 
-Identify every experiment-derived figure, table, metric, and quantitative analysis required by the Evaluation/Experiments section.
+## COMPUTE FALLBACK — DELIVER INSTEAD OF STOPPING
 
-Create:
+Target the closest paper-compatible full campaign first.
 
-```text
-outputs/ted3_reproduction/paper_exports/EVALUATION_COVERAGE_MATRIX.csv
-outputs/ted3_reproduction/paper_exports/EVALUATION_ANALYSIS.md
-```
+If the exact paper-scale run is genuinely impractical on this machine after the compatible runtime is working, **do not stop**. Automatically run the strongest resource-adapted campaign that can complete on the available hardware while preserving the real TED3 data and core SemiTNet method.
 
-For every paper experiment artifact, record:
+Adapt in this order:
 
-- paper figure/table identifier;
-- purpose/metric;
-- source experiment;
-- generated output path;
-- measured vs published-reference provenance;
-- completion/fidelity status.
+1. gradient accumulation / smaller physical batch while preserving effective batch where possible;
+2. mixed precision where supported;
+3. lower worker count / memory-safe loading;
+4. reduced iteration budget with an explicitly recorded scale factor;
+5. deterministic representative training subset only as the final fallback, while still evaluating on the held-out TED3 test set.
 
-Generate all defensible experiment artifacts from real outputs, including:
+Never fall back to the historical 60/20/16 `quick_teeth` experiment.
 
-- figures in PNG plus vector/PDF where practical;
-- experiment tables in CSV plus readable rendered form;
-- training curves;
-- metrics comparisons;
-- qualitative prediction figures;
-- supervised vs semi-supervised comparisons;
-- official checkpoint comparisons;
-- paper-reference vs measured comparisons with dataset/protocol differences explicitly stated;
-- ablations/diagnostics only when supported by actual executions.
+A resource-adapted run must be labeled honestly, but it still must produce real supervised and semi-supervised measured outputs, figures, and tables.
 
-## FINAL VALIDATION AND DELIVERY
+## FAILURE LOOP
 
-Before stopping verify:
+For every error:
 
-- no TED3 archive was re-extracted;
-- original extracted folders were preserved;
-- final simulations consumed TED3 sources / `data/processed/ted3/` manifests;
-- no final experiment used `quick_teeth`;
-- source-directory identities/manifests are recorded;
-- train/test leakage checks were performed;
-- figures/tables trace to real measured outputs;
-- table values match machine-readable metrics;
-- paper values remain explicitly labeled as published references;
-- no raw dataset/archive/oversized checkpoint is tracked or staged by Git.
+`capture log -> identify root cause -> patch -> rerun -> continue`
 
-Produce at minimum:
+Do not repeatedly retry the same broken command.
+Do not stop after a smoke test.
+Do not stop after checkpoint evaluation.
+Do not stop after one experiment.
+Do not report a fixable dependency problem as the final answer.
 
-```text
-outputs/ted3_reproduction/delivery/
-  FINAL_RESULTS.md
-  REPRODUCIBILITY_REPORT.md
-  ISSUES_AND_FIXES.md
-  RUNBOOK_FA.md
-  artifact_manifest.json
-```
+## REQUIRED FINAL OUTPUTS
 
-Do not stop merely because training or simulation finishes.
+Everything new goes under:
 
-Stop only after the TED3 checkpoint evaluation, supervised experiment, semi-supervised experiment, metrics, predictions, figures, tables, Evaluation/Experiments coverage, manuscript-ready analysis, reproducibility documentation, Persian runbook, and final deliverable have all been generated and integrity-checked.
+`outputs/ted3_reproduction/`
 
-Successful final status:
+Before finishing, produce at minimum:
 
-```text
-COMPLETE — DEFENSIBLE TED3 REIMPLEMENTATION
-```
+- checkpoint-evaluation metrics/predictions;
+- supervised metrics/history/predictions;
+- semi-supervised metrics/history/predictions;
+- per-image metrics;
+- comparison tables;
+- training/evaluation curves;
+- qualitative segmentation figures;
+- paper-reference vs measured comparison;
+- `paper_exports/EVALUATION_COVERAGE_MATRIX.csv`;
+- `paper_exports/EVALUATION_ANALYSIS.md`;
+- figures in PNG and PDF/vector where practical;
+- tables in CSV and readable form;
+- `delivery/FINAL_RESULTS.md`;
+- `delivery/REPRODUCIBILITY_REPORT.md`;
+- `delivery/ISSUES_AND_FIXES.md`;
+- `delivery/RUNBOOK_FA.md`;
+- `delivery/artifact_manifest.json`.
 
-Only use:
+All metrics/figures/tables must come from real runs. Never copy paper numbers as measured results. Keep paper reference values clearly labeled.
 
-```text
-BLOCKED — EXTERNAL NON-RECOVERABLE
-```
+## FINAL VALIDATION
 
-for a genuinely external blocker that remains after all locally repairable paths are exhausted. Preserve every completed artifact and provide the exact resumable command/state in that case.
+Before stopping, verify:
+
+- actual loaders used TED3 paths, not `quick_teeth`;
+- test data was not used for training/tuning;
+- no raw dataset/checkpoint is staged in Git;
+- figures/tables match machine-readable metrics;
+- each experiment has exact command/config/environment/dataset provenance;
+- the Evaluation/Experiments artifacts are complete enough to use in the research article.
+
+## FINAL RESPONSE RULE
+
+Do **not** return a long explanation of what prevented you from working.
+
+Return only after you have delivered the campaign outputs.
+
+Your final response must contain:
+
+1. what actually ran;
+2. measured checkpoint / supervised / semi-supervised metrics;
+3. exact output folders;
+4. generated figures and tables count/list;
+5. important deviations from the paper in a short table;
+6. final validation status.
+
+Allowed final statuses:
+
+- `COMPLETE — TED3 CAMPAIGN DELIVERED`
+- `COMPLETE — RESOURCE-ADAPTED TED3 CAMPAIGN DELIVERED`
+
+`BLOCKED` is allowed only for a truly external impossibility that cannot be repaired by changing code/environment/container and only after preserving every completed real output. Dependency installation or Detectron2 architecture mismatch alone is **not** sufficient reason to stop.
