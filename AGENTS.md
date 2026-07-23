@@ -6,233 +6,285 @@ This file is authoritative for any coding/research agent operating in this repos
 
 Once the TED3 archives are present locally, execute an end-to-end, defensible SemiTNet reproduction/reimplementation campaign. Do not stop after setup, a smoke test, a partial experiment, or the first error. Diagnose recoverable failures, patch the repository, rerun the affected stage, and continue until the final evidence package passes the completion checklist below.
 
-## Required local input archives
+## Authoritative dataset inputs
 
-The agent must auto-discover these exact files anywhere under the repository working tree, preferring `reproduction/assets/dataset/incoming/` when multiple copies exist:
+The three required TED3 archives are expected under the repository `data/` directory or one of its subdirectories. The agent must prioritize `data/` and auto-discover these exact files:
 
 - `TED3-train.tar`
 - `TED3-test.tar`
 - `TED3-unlabeled-data-15k-pseudo-mask.tar`
 
-These archives and all extracted datasets are local research inputs. They must never be committed, added to Git LFS, copied into the client ZIP, or pushed to GitHub.
+Preferred discovery order:
 
-Before reading/extracting them:
+1. `data/`
+2. `data/TED3/`
+3. `data/ted3/`
+4. `data/incoming/`
+5. recursive search under `data/`
+6. whole-repository fallback only if needed
 
-1. Verify `.gitignore` contains the exact filenames and broad dataset/archive rules.
-2. Run `git check-ignore -v` on all three archives.
-3. Run `git status --short` and confirm no dataset/checkpoint file is staged or tracked.
-4. If any dataset file is tracked, remove it from the Git index without deleting the local file, then continue.
+These archives are the authoritative inputs for the TED3 campaign. Do not redownload or silently substitute the historical 598-image `quick_teeth` dataset.
+
+The processed dataset root for the campaign is:
+
+```text
+data/processed/ted3/
+```
+
+The final supervised and semi-supervised dataloaders must consume processed TED3 data from this root. The historical `python project.py full` command belongs to the reduced `quick_teeth` experiment and must not be used as the final TED3 simulation.
+
+The archives and all extracted datasets are local research inputs. They must never be committed, added to Git LFS, copied into a client ZIP, or pushed to GitHub.
+
+Before extraction:
+
+1. Run `python project.py ted3-preflight`.
+2. Verify `.gitignore` protects the archive paths and processed data directories.
+3. Confirm all three archives are ignored and not tracked/staged.
+4. Compute/record archive SHA256 and byte sizes.
+5. Inspect tar members for unsafe paths/links before extraction.
+6. Preserve the original archives unchanged.
 
 ## Non-negotiable scientific rules
 
-1. **Measured outputs only.** Never copy paper metrics into measured-output files, never fabricate predictions, curves, tables, baselines, confidence intervals, or missing experiment results.
-2. **Paper reference values and measured values must remain separate.** Any paper number used for comparison must be labeled `published_reference` and carry source/provenance.
-3. Preserve the historical reduced baseline under `outputs/final/`; do not overwrite it.
-4. TED3 is a defensible public-author dataset for the new campaign, but it must not be silently claimed to be byte-identical to the unavailable original TSI15k split. State the dataset/split relationship explicitly in every final report.
-5. Do not tune directly on the final test set. Use train/validation partitions or fixed validation identities for model selection; reserve test for final evaluation.
-6. Every experiment must have a machine-readable manifest: git SHA, dataset hashes/manifests, code/config, seed, environment, device, checkpoint hash, start/end time, and exact command.
-7. Every failure that can be repaired locally must be repaired and rerun. Do not merely document a stack trace and stop.
+1. **Measured outputs only.** Never copy paper metrics into measured-output files and never fabricate predictions, curves, tables, baselines, confidence intervals, or missing experiment results.
+2. **Separate published reference from measured evidence.** Any paper number used for comparison must be labeled `published_reference` and carry provenance.
+3. Preserve the historical reduced baseline under `outputs/final/`; never overwrite it.
+4. TED3 is a defensible public-author dataset for the new campaign, but it must not be claimed to be byte-identical to unavailable TSI15k unless identity-equivalence is proven.
+5. Do not tune on the final test set. Use train-derived validation for model selection and reserve test for final evaluation.
+6. Every experiment must have a machine-readable manifest: git SHA, dataset archive hashes, processed-root identities, config, seed, environment, device, checkpoint hash, timestamps and exact command.
+7. Every locally recoverable failure must be repaired and rerun. Do not merely record a stack trace and stop.
+8. Smoke runs are debugging only. They must not be presented as the final simulation.
+9. The final execution manifest must prove that the actual training/evaluation dataloaders used `data/processed/ted3/` and not `data/processed/quick_teeth/`.
 
-## Execution order
+## Phase 0 — repository and TED3 input preflight
 
-### Phase 0 — repository and data preflight
+Start with:
 
-- Snapshot `git rev-parse HEAD` and `git status`.
-- Discover the three archives.
-- Compute SHA256 and byte size for each archive.
-- Inspect tar contents before extraction; reject unsafe paths/symlinks/path traversal.
-- Extract into ignored paths under `reproduction/assets/dataset/ted3/`.
-- Produce `outputs/ted3_reproduction/preflight/` with archive hashes, extraction manifest, disk-usage report, environment report, and preflight status.
+```bash
+python project.py ted3-preflight
+```
 
-### Phase 1 — dataset forensic audit
+Then:
 
-Audit train/test/unlabeled data before training:
+- snapshot Git HEAD/status;
+- locate all three archives under `data/`;
+- hash and inspect them;
+- safely extract/process them into separate roots under `data/processed/ted3/`;
+- build source-member → processed-file manifests;
+- record disk usage/environment/preflight state under `outputs/ted3_reproduction/preflight/`.
 
-- exact image counts and annotation counts;
-- class/category mapping and tooth-ID semantics;
-- image dimensions/formats;
-- duplicate and near-duplicate checks where computationally practical;
-- exact duplicate leakage across train/test/unlabeled using cryptographic hashes;
-- missing/corrupt images and annotations;
-- train/test identity lists and hashes;
-- labeled vs pseudo-labeled vs unlabeled provenance;
-- whether the provided test set can be reconciled with the paper-reported 191-case test protocol;
-- fully dentate / partially edentulous grouping if recoverable without guessing.
+Do not use `scripts/download_quick_dataset.py`, `scripts/prepare_quick_dataset.py`, or the `quick_teeth` split as TED3 input.
 
-Write all findings under `outputs/ted3_reproduction/dataset_audit/` and create a clear `DATASET_AUDIT.md` plus machine-readable JSON/CSV manifests.
+## Phase 1 — dataset forensic audit
 
-### Phase 2 — publication-compatible implementation freeze
+Inspect the real extracted archive structure before assuming loader formats. Implement/repair TED3-specific loaders/converters as needed.
 
-Use the authors' released SemiTNet/SemiT-SAM code and checkpoint as primary implementation evidence, while documenting paper-vs-code discrepancies already recorded in `reproduction/PAPER_CODE_DISCREPANCIES.md`.
+Audit:
+
+- exact image/annotation counts;
+- category/tooth-ID mapping;
+- dimensions and image formats;
+- corrupt/missing files;
+- exact duplicate leakage across train/test/unlabeled with cryptographic hashes;
+- near-duplicate checks where practical;
+- identity lists/hashes;
+- human-label vs pseudo-label vs unlabeled provenance;
+- whether test composition can be reconciled with the paper-reported 191-case protocol;
+- fully dentate/partially edentulous grouping only if recoverable without guessing.
+
+Output under `outputs/ted3_reproduction/dataset_audit/`, including `DATASET_AUDIT.md`, JSON/CSV manifests and leakage reports.
+
+Do not start expensive training until real-data loading/inference smoke checks pass and train/test leakage/class mapping issues are resolved or explicitly documented.
+
+## Phase 2 — publication-compatible implementation freeze
+
+Use the authors' released SemiTNet/SemiT-SAM implementation and released checkpoint as primary executable evidence. Resolve paper-vs-current-code discrepancies explicitly using `reproduction/PAPER_CODE_DISCREPANCIES.md`.
 
 Freeze and record:
 
-- backbone/model architecture;
-- input preprocessing and 1024-size policy;
+- architecture/backbone;
+- RGB/input-size preprocessing policy;
 - class mapping;
 - 100-query decoder behavior;
 - losses and weights;
 - teacher/student initialization;
-- burn-in, pseudo-label filtering, EMA/distillation behavior;
-- optimizer, LR schedule, iteration budget;
-- evaluator and post-processing thresholds;
-- dependency versions.
+- burn-in/pseudo-label filtering/EMA/distillation;
+- optimizer/LR/iteration budget;
+- evaluator/post-processing;
+- dependency/runtime versions.
 
-Do not blindly use a newer upstream default when it contradicts the paper. Resolve each discrepancy explicitly and record the chosen configuration in a completed method manifest derived from `reproduction/paper_method_manifest.template.json`.
+Create a completed publication-compatible method manifest. Do not silently use a newer upstream default that contradicts the paper.
 
-### Phase 3 — official checkpoint evaluation first
+## Phase 3 — official checkpoint evaluation first
 
-Before expensive retraining:
+Before retraining:
 
 - acquire/verify the pinned author checkpoint;
-- run it on the audited TED3 test data using the publication-compatible pipeline;
-- generate per-image predictions and metrics;
-- compare with published reference metrics without treating TED3 results as exact TSI15k reproduction unless identity equivalence is established.
+- evaluate it on processed TED3 test data using the publication-compatible loader/evaluator;
+- generate real per-image predictions/metrics and aggregate metrics;
+- compare with published reference values while clearly labeling the dataset/protocol relationship.
 
-Required outputs under `outputs/ted3_reproduction/checkpoint_eval/`:
+Required output root:
 
-- `metrics.json`
-- `per_image_metrics.csv`
-- `run_manifest.json`
-- `checkpoint_sha256.txt`
-- prediction visualizations
-- raw evaluator output/logs
-- `CHECKPOINT_EVALUATION.md`
+```text
+outputs/ted3_reproduction/checkpoint_eval/
+```
 
-If this stage fails technically, debug and continue. If performance is poor, diagnose dataset/class/preprocessing/evaluator mismatch before changing training code.
+Required artifacts include `metrics.json`, `per_image_metrics.csv`, `run_manifest.json`, checkpoint hash, predictions, evaluator logs and `CHECKPOINT_EVALUATION.md`.
 
-### Phase 4 — supervised controlled experiment
+If performance is unexpectedly poor, diagnose dataset/class/preprocessing/evaluator/checkpoint mismatch before changing training code.
 
-Train the publication-compatible architecture on labeled TED3 training data with a fixed validation protocol and evaluate once on test.
+## Phase 4 — supervised controlled experiment
 
-Save:
+Train the closest defensible publication-compatible architecture using processed labeled TED3 training data. Use a fixed train-derived validation protocol; evaluate the test set only for final assessment.
 
-- complete configs;
-- training history;
-- checkpoints and hashes;
-- validation selection evidence;
-- final metrics/per-image metrics;
-- qualitative predictions;
-- runtime/resource statistics.
+Output:
 
-Output: `outputs/ted3_reproduction/supervised/`.
+```text
+outputs/ted3_reproduction/supervised/
+```
 
-### Phase 5 — semi-supervised TED3 experiment
+Save complete configs, histories, validation-selection evidence, checkpoint hashes, final metrics/per-image metrics, qualitative predictions and runtime/resource statistics.
 
-Use the large unlabeled TED3 archive for the teacher/student experiment. Preserve label hiding/provenance; pseudo masks supplied by the archive must be identified as such and must not be accidentally treated as ground-truth test labels.
+## Phase 5 — full TED3 semi-supervised experiment
 
-Implement and run the closest defensible SemiTNet workflow supported by the publication and released code:
+Use the processed large TED3 unlabeled/pseudo-mask archive in its correct non-ground-truth role.
 
-- teacher/labeled pretraining;
+Run the closest defensible full workflow supported by publication/released code:
+
+- teacher labeled-data pretraining;
 - unlabeled/pseudo-label processing;
 - burn-in;
 - student training;
-- teacher EMA updates/distillation;
-- final evaluation with the same evaluator used for the supervised experiment.
+- teacher EMA/distillation updates;
+- final evaluation with the same validated evaluator.
 
-Output: `outputs/ted3_reproduction/semi_supervised/` with the same provenance requirements as Phase 4.
+Do not silently reduce this to `QuickSemiTransformer`, the 60/20/16 quick split, 128×256 inputs, or a toy smoke run.
 
-### Phase 6 — experiment comparison and statistical analysis
+Output:
 
-Compare, on the same evaluation protocol:
+```text
+outputs/ted3_reproduction/semi_supervised/
+```
 
-1. historical reduced run (context only);
+## Phase 6 — comparison and statistical analysis
+
+Compare on a clearly documented evaluation protocol:
+
+1. historical reduced run — context only;
 2. released author checkpoint on TED3;
-3. supervised publication-compatible run;
+3. supervised publication-compatible TED3 run;
 4. semi-supervised TED3 run.
 
-Where repeated seeds are computationally feasible, report mean/std and confidence intervals. If only one authoritative full run is feasible, state that limitation explicitly and do not invent uncertainty estimates.
+Where repeated seeds are feasible, report mean/std/confidence intervals. If only one authoritative full run is feasible, state that limitation and do not invent uncertainty.
 
 Create:
 
 - `outputs/ted3_reproduction/comparison/metrics_comparison.csv`
 - `outputs/ted3_reproduction/comparison/per_experiment_summary.json`
 - `outputs/ted3_reproduction/comparison/STATISTICAL_ANALYSIS.md`
-- ablation/diagnostic tables when supported by actual runs.
+- any ablation/diagnostic tables supported by actual runs.
 
-### Phase 7 — paper/evaluation-section artifact coverage
+## Phase 7 — Evaluation/Experiments artifact coverage
 
-Inspect the research article/reference material already present in the repository and build an artifact coverage matrix for every experiment-derived figure, table, and quantitative statement in the evaluation/experiments section.
+Inspect the research article/reference material already present in the repository and enumerate every experiment-derived figure, table, metric and quantitative claim in the Evaluation/Experiments section.
 
-For each paper artifact, record:
+Build:
 
-- paper figure/table identifier;
+```text
+outputs/ted3_reproduction/paper_exports/EVALUATION_COVERAGE_MATRIX.csv
+```
+
+For each artifact record:
+
+- paper identifier;
 - purpose/metric;
 - source experiment;
-- generated replacement/comparison artifact;
+- generated artifact path;
 - measured vs published-reference provenance;
 - fidelity/status (`generated`, `not applicable`, `blocked by unavailable source output`).
 
-Do not generate architectural/conceptual figures as if they were experiment outputs unless explicitly needed for the deliverable.
+Generate all defensible real-output figures/tables: PNG plus vector/PDF where practical, CSV plus readable rendered forms, training curves, metric comparisons, qualitative prediction panels, supervised vs semi-supervised comparison, checkpoint comparison and paper-reference comparison with dataset differences labeled.
 
-Required outputs:
+Write manuscript-ready analysis to:
 
-- `outputs/ted3_reproduction/paper_exports/EVALUATION_COVERAGE_MATRIX.csv`
-- all measured figures in PNG plus vector/PDF form where practical;
-- all experiment tables in CSV plus a human-readable rendered form;
-- `outputs/ted3_reproduction/paper_exports/EVALUATION_ANALYSIS.md` explaining the results and gaps in language suitable for the manuscript evaluation/experiment section;
-- a paper-vs-measured comparison report that clearly separates datasets and protocols.
+```text
+outputs/ted3_reproduction/paper_exports/EVALUATION_ANALYSIS.md
+```
 
-### Phase 8 — final validation and delivery
+## Phase 8 — final validation and delivery
 
-Run integrity checks over every final artifact:
+Validate:
 
-- all required metrics finite and sourced from real outputs;
-- figures readable and traceable to source data;
-- table values agree with machine-readable metrics;
-- no paper reference value is mislabeled as measured;
-- no train/test leakage detected or left unexplained;
-- no large dataset/archive/checkpoint accidentally tracked by Git;
-- deterministic commands/runbook are complete enough for another researcher to rerun;
-- repository remains readable to a user unfamiliar with the codebase.
+- final runs consumed `data/processed/ted3/`;
+- no final measured result came from `quick_teeth`;
+- no unresolved leakage is hidden;
+- metrics are finite and traceable;
+- figures/tables agree with machine-readable source data;
+- published values are never mislabeled as measured;
+- datasets/archives/checkpoints are not tracked/staged;
+- rerun instructions are complete.
 
-Create a final package under:
+Final delivery root:
 
-`outputs/ted3_reproduction/delivery/`
+```text
+outputs/ted3_reproduction/delivery/
+```
 
-containing only code/config/report/result artifacts appropriate for delivery, not raw datasets or oversized checkpoints unless explicitly required and legally redistributable.
-
-Required final reports:
+Required reports:
 
 - `FINAL_RESULTS.md`
 - `REPRODUCIBILITY_REPORT.md`
 - `ISSUES_AND_FIXES.md`
-- `RUNBOOK_FA.md` (Persian execution/runbook document)
-- `artifact_manifest.json` with hashes and provenance
+- `RUNBOOK_FA.md`
+- `artifact_manifest.json`
+
+The final execution manifest must explicitly record:
+
+- discovered source archive paths under `data/`;
+- archive SHA256 values;
+- processed dataset paths under `data/processed/ted3/`;
+- actual dataset roots used by each dataloader/experiment;
+- confirmation that final experiments did not use `quick_teeth`.
 
 ## Failure-handling policy
 
-The agent must operate as a repair loop:
+Operate as a repair loop:
 
-1. capture the failing command and logs;
-2. identify the root cause;
+1. capture failing command/logs;
+2. identify root cause;
 3. patch the smallest defensible fix;
-4. add/adjust a regression or smoke check when appropriate;
+4. add/update a smoke/regression check where useful;
 5. rerun the failed stage;
-6. continue downstream only after the stage passes.
+6. continue downstream after it passes.
 
-Do not repeatedly retry unchanged commands. Do not hide failures by weakening validation, deleting checks, substituting fabricated outputs, or changing the scientific question.
+Do not repeatedly retry unchanged commands. Do not weaken validation, fabricate output, train on test, substitute legacy data, or silently change the scientific question.
 
-A truly external/non-recoverable blocker (for example corrupted/unreadable local archives with no valid copy, unavailable required credentials, or insufficient storage/compute that makes execution impossible) must be documented precisely. Preserve all completed artifacts and leave an exact resumable command/state. Otherwise continue until completion.
+Only a genuinely external/non-recoverable blocker—such as corrupt/missing archives with no valid copy, unavailable required external credentials/assets, or objectively impossible storage/compute—may stop the campaign early. Preserve all completed artifacts and an exact resumable command/state.
 
-## Completion checklist — the agent may stop only when all applicable items are satisfied
+## Completion checklist
 
-- [ ] All three local archives discovered, ignored by Git, hashed, safely extracted and audited.
-- [ ] Dataset leakage/corruption/class mapping audit completed.
+The agent may stop only when all applicable items are satisfied:
+
+- [ ] All three TED3 archives discovered under `data/`, Git-ignored, untracked, hashed and safely processed.
+- [ ] `data/processed/ted3/` created with train/test/unlabeled provenance manifests.
+- [ ] Dataset corruption/leakage/class mapping audit completed.
+- [ ] Real TED3 loader/inference smoke checks pass.
 - [ ] Publication-compatible method manifest frozen.
 - [ ] Official checkpoint evaluation completed with measured outputs.
-- [ ] Supervised experiment completed and validated.
-- [ ] Semi-supervised experiment completed and validated.
-- [ ] Per-image and aggregate metrics saved for every completed experiment.
-- [ ] Required evaluation/experiment figures generated from real outputs.
-- [ ] Required evaluation/experiment tables generated from real outputs.
+- [ ] Supervised TED3 experiment completed and validated.
+- [ ] Semi-supervised TED3 experiment completed and validated.
+- [ ] Final manifests prove the simulations consumed TED3, not `quick_teeth`.
+- [ ] Per-image and aggregate metrics saved.
+- [ ] Required Evaluation/Experiments figures generated from real outputs.
+- [ ] Required Evaluation/Experiments tables generated from real outputs.
 - [ ] Evaluation coverage matrix complete.
-- [ ] Paper-vs-measured comparison and methodological limitations documented.
+- [ ] Paper-vs-measured comparison and limitations documented.
 - [ ] Persian runbook complete.
-- [ ] Final deliverable package built and integrity-checked.
-- [ ] `git status` confirms no dataset archives/raw data/checkpoints are accidentally staged or tracked.
+- [ ] Final delivery package integrity-checked.
+- [ ] Git status confirms no raw data/archive/checkpoint is staged or tracked.
 
-The final status must be one of:
+Final status must be one of:
 
-- `COMPLETE — DEFENSIBLE TED3 REIMPLEMENTATION` when all required local experiments and deliverables above are complete; or
-- `BLOCKED — EXTERNAL NON-RECOVERABLE` only with exact evidence, completed partial artifacts, and a resumable next command.
+- `COMPLETE — DEFENSIBLE TED3 REIMPLEMENTATION`
+- `BLOCKED — EXTERNAL NON-RECOVERABLE` only with exact evidence and resumable state.
